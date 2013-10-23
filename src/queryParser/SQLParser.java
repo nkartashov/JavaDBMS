@@ -1,9 +1,9 @@
 package queryParser;
 
 import java.util.ArrayList;
-import DbCommands.CreateTableCommand;
-import DbCommands.DbCommand;
-import TableTypes.ColumnTuple;
+import dbCommands.CreateTableCommand;
+import dbCommands.DbCommand;
+import tableTypes.ColumnTuple;
 
 public class SQLParser {
 

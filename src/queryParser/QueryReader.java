@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class QueryReader {
 
     public QueryReader() { query = new ArrayList<String>(); }
+
     public void read() {
 
         try{
