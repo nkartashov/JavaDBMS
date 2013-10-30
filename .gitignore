@@ -13,6 +13,7 @@
 *.iws
 workspace.xml
 tasks.xml
+vcs.xml
  
 ### Eclipse ###
 *.pydevproject
