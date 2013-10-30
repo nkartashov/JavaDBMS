@@ -13,6 +13,7 @@ public class InsertRowsCommand implements DbCommand
 {
     public InsertRowsCommand(String tableName, TableRow[] rows)
     {
+        _tableName = tableName;
         _rows = rows;
     }
 
