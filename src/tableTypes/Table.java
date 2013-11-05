@@ -23,11 +23,16 @@ public class Table {
     public Table(UUID uid, String name, ArrayList<ColumnTuple> tuples)
     {
         _name = name;
+	    Column columnToAdd;
         for (ColumnTuple tuple : tuples)
         {
-            _columns.add(new Column(tuple));
+	        columnToAdd = new Column(tuple);
+            _columns.add(columnToAdd);
+	        _rowSize += columnToAdd.size();
         }
         _uid = uid;
+
+        _dataFileName = _uid + "_data";
     }
 
     public StringBuilder Serialize(StringBuilder result)
@@ -52,6 +57,8 @@ public class Table {
         Matcher columnsMatcher = columnsPattern.matcher(text);
         columnsMatcher.find();
         this.DeserializeColumns(columnsMatcher.group(1));
+
+        _dataFileName = _uid + "_data";
     }
 
     public static String readTableHeader(File file)
@@ -82,12 +89,40 @@ public class Table {
         return _uid;
     }
 
+    public String getName()
+    {
+        return _name;
+    }
+
+    public String getDataFileName()
+    {
+        return _dataFileName;
+    }
+
+    public void InsertRows(int rows)
+    {
+        _numberOfRows += rows;
+    }
+
+    public void DeleteRows(int rows)
+    {
+        _numberOfRows -= rows;
+    }
+
+	public int RowSize()
+	{
+		return _rowSize;
+	}
+
     private StringBuilder SerializeMetadata(StringBuilder result)
     {
         result.append("<meta>");
         result.append("<name>");
         result.append(_name);
         result.append("</name>");
+        result.append("<numRows>");
+        result.append(_numberOfRows);
+        result.append("</numRows>");
         result.append("</meta>");
         result.append("\n");
         return result;
@@ -115,9 +150,9 @@ public class Table {
             Column deserializedColumn = new Column();
             deserializedColumn.DeserializeColumn(columnMatcher.group(1));
             _columns.add(deserializedColumn);
+	        _types.add(deserializedColumn.type());
         }
     }
-
 
     private void DeserializeMetadata(String text)
     {
@@ -125,10 +160,18 @@ public class Table {
         Matcher nameMatcher = namePattern.matcher(text);
         nameMatcher.find();
         _name = nameMatcher.group(1);
+
+        Pattern numberPattern = Pattern.compile("<numRows>(.*?)</numRows>");
+        Matcher numberMatcher = numberPattern.matcher(text);
+        numberMatcher.find();
+        _name = numberMatcher.group(1);
     }
 
-
+	private ArrayList<BaseTableType> _types = new ArrayList<BaseTableType>();
     private ArrayList<Column> _columns = new ArrayList<Column>();
+	private int _rowSize = 0;
     private String _name;
     private UUID _uid;
+    private int _numberOfRows = 0;
+    private String _dataFileName;
 }

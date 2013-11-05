@@ -1,4 +1,5 @@
 package dbEnvironment;
+import memoryManager.PageManager;
 import tableTypes.Table;
 import utils.Logger;
 
@@ -7,6 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 
 /**
@@ -24,10 +26,10 @@ public class DbContext {
         _closed = false;
     }
 
-    public ArrayList<Table> getTables()
+    public Table[] getTables()
     {
         if (!_closed)
-            return _tables;
+            return _tables.values().toArray(new Table[_tables.size()]);
         else
             return null;
     }
@@ -39,9 +41,10 @@ public class DbContext {
 
     public void close()
     {
-        StringBuilder serializer = new StringBuilder();
+        //Dumps table definitions to disk
+	    StringBuilder serializer = new StringBuilder();
         String filePath;
-        for (Table table : _tables)
+        for (Table table : _tables.values())
         {
             serializer.setLength(0);
             table.Serialize(serializer);
@@ -49,6 +52,12 @@ public class DbContext {
             DumpTableToFile(filePath, serializer);
         }
         _tables.clear();
+
+
+	    //Dumps cached pages to disk and clears cache
+	    _pageManager.close();
+
+	    // Everything is dumped by that point
         _closed = true;
     }
 
@@ -65,8 +74,18 @@ public class DbContext {
             tableHeader = Table.readTableHeader(file);
             tableToAdd = new Table();
             tableToAdd.Deserialize(UUID.fromString(file.getName()), tableHeader);
-            _tables.add(tableToAdd);
+            _tables.put(tableToAdd.getName(), tableToAdd);
         }
+    }
+
+    public Table getTableByName (String tableName)
+    {
+        return _tables.get(tableName);
+    }
+
+    public PageManager getPageManager()
+    {
+        return _pageManager;
     }
 
     @Override
@@ -94,5 +113,6 @@ public class DbContext {
 
     private boolean _closed = true;
     private String _location;
-    private ArrayList<Table> _tables = new ArrayList<Table>();
+    private LinkedHashMap<String, Table> _tables = new LinkedHashMap<String, Table>();
+    private PageManager _pageManager = PageManager.GetInstance();
 }

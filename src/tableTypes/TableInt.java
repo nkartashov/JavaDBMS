@@ -10,7 +10,7 @@ public class TableInt extends BaseTableType {
 
     public TableInt()
     {
-        this.SetSize(4);
+        this.setSize(4);
     }
 
     @Override public String toString()

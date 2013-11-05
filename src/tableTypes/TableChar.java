@@ -10,13 +10,13 @@ public class TableChar extends BaseTableType {
 
     public TableChar(int size)
     {
-        this.SetSize(size);
+        this.setSize(size);
     }
 
     @Override public String toString()
     {
         StringBuilder result = new StringBuilder("<type>char ");
-        result.append(this.GetSize());
+        result.append(this.size());
         result.append("</type>");
         return result.toString();
     }

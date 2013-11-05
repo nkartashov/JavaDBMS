@@ -26,6 +26,11 @@ public class Column {
             _type = new TableInt();
     }
 
+	public int size()
+	{
+		return _type.size();
+	}
+
     @Override public String toString()
     {
         StringBuilder result = new StringBuilder();
@@ -54,7 +59,8 @@ public class Column {
             _type = new TableInt();
     }
 
+	public BaseTableType type() {return _type;}
+
     private String _name;
     private BaseTableType _type;
-
 }

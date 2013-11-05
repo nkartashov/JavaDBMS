@@ -8,11 +8,11 @@
 package tableTypes;
 public class BaseTableType {
 
-    public int GetSize()
+    public int size()
     {
         return _size;
     }
-    public void SetSize(int size)
+    public void setSize(int size)
     {
         _size = size;
     }

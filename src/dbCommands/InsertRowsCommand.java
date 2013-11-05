@@ -1,6 +1,12 @@
 package dbCommands;
 
 import dbEnvironment.DbContext;
+import memoryManager.DiskPage;
+import memoryManager.PageId;
+import memoryManager.PageManager;
+import tableTypes.Table;
+
+import java.util.UUID;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,8 +25,27 @@ public class InsertRowsCommand implements DbCommand
 
     public void executeCommand(DbContext context)
     {
+        for (TableRow row : _rows)
+        {
+            InsertRow(context, row);
+        }
     }
 
-    public String _tableName;
-    public TableRow[] _rows;
+    private void InsertRow(DbContext context, TableRow row)
+    {
+        Table tableToInsertInto = context.getTableByName(_tableName);
+        PageManager pageManager = context.getPageManager();
+
+        // get second page of data
+        PageId notFullPage = new PageId(tableToInsertInto.getDataFileName(), NOT_FULL_PAGE_INDEX);
+
+        byte[] rawNotFullPage = pageManager.GetPage(notFullPage);
+
+    }
+
+    // the index of the first page, which contains indeces for first n not full pages
+    private static long NOT_FULL_PAGE_INDEX = 2;
+
+    private String _tableName;
+    private TableRow[] _rows;
 }
