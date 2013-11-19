@@ -8,4 +8,16 @@ public class Checkers {
 
         return true;
     }
+    static boolean CheckInsertInto (String iiquery) {
+
+        // not implemented yet
+
+        return true;
+    }
+    static boolean CheckSelect (String squery) {
+
+        // not implemented yet
+
+        return true;
+    }
 }
