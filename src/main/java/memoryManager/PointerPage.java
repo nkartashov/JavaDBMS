@@ -17,9 +17,14 @@ public class PointerPage extends DiskPage
 	{
 		super(rawPage, blankPage);
 		if (blankPage)
+		{
 			initHeader(_rawPage);
+			_pointersCount = 0;
+		}
 		else
+		{
 			_pointersCount = ByteConverter.intFromByte(_rawPage, COUNT_OFFSET);
+		}
 	}
 
 	public long getPointer(int index)

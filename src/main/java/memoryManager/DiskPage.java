@@ -20,6 +20,8 @@ public class DiskPage {
 	    if (blankPage)
 	    {
 		    initHeader(_rawPage);
+		    _nextPageIndex = NULL_PTR;
+		    _prevPageIndex = NULL_PTR;
 	    }
 	    else
 	    {
