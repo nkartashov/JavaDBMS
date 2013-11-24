@@ -20,8 +20,8 @@ public class DiskPageTest
 
 		DiskPage newPage = new DiskPage(rawData, true);
 
-		Assert.assertEquals(newPage.nextPageIndex(), DiskPage.NULL_PTR);
-		Assert.assertEquals(newPage.prevPageIndex(), DiskPage.NULL_PTR);
+		Assert.assertEquals(DiskPage.NULL_PTR, newPage.nextPageIndex());
+		Assert.assertEquals(DiskPage.NULL_PTR, newPage.prevPageIndex());
 	}
 
 	@Test
