@@ -3,7 +3,10 @@ package queryParser;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import dbCommands.*;
+import dbCommands.CreateTableCommand;
+import dbCommands.DbCommand;
+import dbCommands.InsertRowsCommand;
+import dbCommands.TableRow;
 import tableTypes.ColumnTuple;
 
 public class SQLParser {
@@ -59,7 +62,7 @@ public class SQLParser {
                 parsedColumns.add(new ColumnTuple(forNameAndType[0], 0, forNameAndType[1]));
         }
         tableParams.add(parsedColumns);
-        DbCommand ctc = new CreateTableCommand (tableParams.get(0).toString(), (ArrayList<ColumnTuple>)tableParams.get(1));
+        DbCommand ctc = new CreateTableCommand(tableParams.get(0).toString(), (ArrayList<ColumnTuple>)tableParams.get(1));
         //System.out.println(tableParams);
         return ctc;
     }
@@ -75,10 +78,11 @@ public class SQLParser {
             insertionList[i] = new TableRow(new ArrayList<String>(Arrays.asList(values)));
             ++i;
         }
-        DbCommand iic = new InsertRowsCommand(name, insertionList);
+        //DbCommand iic = new InsertRowsCommand(name, insertionList);
         System.out.println(name);
         //System.out.println(insertionList);
-        return iic;
+        //return iic;
+        return null;
     }
     private DbCommand parseSelect() {
         if (_query.toUpperCase().indexOf("JOIN") != -1) {
@@ -92,8 +96,9 @@ public class SQLParser {
             String first_col_name = _query.split(" ", 2)[1];
             if (first_col_name.equals("*")) {
                 String table_name = _query.split(" ", 4)[3].trim();
-                DbCommand select_all = new SelectAllCommand(table_name);
-                return select_all;
+                //DbCommand select_all = new SelectAllCommand(table_name);
+                //return select_all;
+                return null;
             }
             return null;
         }
