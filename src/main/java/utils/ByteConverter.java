@@ -1,6 +1,7 @@
 package utils;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -53,6 +54,19 @@ public class ByteConverter
 	{
 		System.arraycopy(charsToByte(item), 0, buffer, offset, item.length * CHAR_LENGTH_IN_BYTES);
 	}
+
+    public static byte[] bitsetToBytes(BitSet item) {
+        byte[] bytes = new byte[(item.length() / 8) + 1];
+        for (int i = 0; i != bytes.length; ++i) {
+            bytes[i] = 0;
+        }
+        for (int i = 0; i != item.length(); ++i) {
+            if (item.get(i)) {
+                bytes[i / 8] |= 1 << (i % 8);
+            }
+        }
+        return bytes;
+    }
 
 
 	public static int LONG_LENGTH_IN_BYTES = 8;
