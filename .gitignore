@@ -43,5 +43,14 @@ local.properties
 # PDT-specific
 .buildpath
  
-### Maven ###
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Mac
+.DS_Store
+
+# Maven
+log/
 target/
