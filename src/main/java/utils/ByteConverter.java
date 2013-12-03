@@ -39,15 +39,18 @@ public class ByteConverter
 		return ByteBuffer.allocate(INT_LENGTH_IN_BYTES).putInt(item).array();
 	}
 
-	public static byte[] charsToByte(char[] item, int padding)
+	public static byte[] stringToBytes(String item, int padding)
 	{
-		ByteBuffer result = ByteBuffer.allocate(CHAR_LENGTH_IN_BYTES * item.length);
-		for (int i = 0; i < item.length; ++i)
-			result.putChar(i, item[i]);
-		byte[] dataResult = result.array();
-		if (padding > 0)
-			dataResult = ArrayUtils.addAll(new byte[padding], dataResult);
-		return dataResult;
+		ByteBuffer buffer = ByteBuffer.allocate(CHAR_LENGTH_IN_BYTES);
+		byte[] result = new byte[0];
+		for (char ch: item.toCharArray())
+		{
+			buffer.clear();
+			buffer.putChar(0, ch);
+			result = ArrayUtils.addAll(result, buffer.array());
+		}
+
+		return ArrayUtils.addAll(result, new byte[padding]);
 	}
 
 	public static byte[] bitsetToBytes(BitSet b)

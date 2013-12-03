@@ -8,6 +8,7 @@
 package tableTypes;
 
 import dbCommands.TableRow;
+import org.apache.commons.lang3.ArrayUtils;
 import utils.ByteConverter;
 
 public class TableChar extends BaseTableType {
@@ -28,8 +29,8 @@ public class TableChar extends BaseTableType {
 	@Override
 	public byte[] getAsByte(TableRow row, int columnPos)
 	{
-		char[] arrayToConvert = row.getAsCharArray(columnPos);
-		return ByteConverter.charsToByte(arrayToConvert, size() - arrayToConvert.length * ByteConverter.CHAR_LENGTH_IN_BYTES);
+		String stringToConvert = row.getAsString(columnPos);
+		return ByteConverter.stringToBytes(stringToConvert, size() - stringToConvert.length() * ByteConverter.CHAR_LENGTH_IN_BYTES);
 	}
 
 	@Override

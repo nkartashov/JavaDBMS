@@ -13,12 +13,12 @@ import org.junit.Assert;
 public class ByteConverterTests
 {
 	@Test
-	public void BytesFromCharsTest()
+	public void BytesFromStringTest()
 	{
-		int expectedResultLength = 20;
+		int tableTypeSize = 20;
 		String testString = "jfkfldkf";
-		Assert.assertEquals(expectedResultLength,
-			ByteConverter.charsToByte(testString.toCharArray(),
-				expectedResultLength - testString.length() * 2).length);
+		Assert.assertEquals(tableTypeSize,
+			ByteConverter.stringToBytes(testString,
+				tableTypeSize - testString.length() * ByteConverter.CHAR_LENGTH_IN_BYTES).length);
 	}
 }

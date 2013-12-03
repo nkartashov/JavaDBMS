@@ -25,9 +25,9 @@ public class TableRow
 		return Integer.parseInt(_arguments.get(pos));
 	}
 
-	public char[] getAsCharArray(int pos)
+	public String getAsString(int pos)
 	{
-		return _arguments.get(pos).toCharArray();
+		return _arguments.get(pos);
 	}
 
 	public byte[] getAsByteArray(ArrayList<BaseTableType> rowSignature)

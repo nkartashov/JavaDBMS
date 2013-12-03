@@ -3,6 +3,7 @@ package memoryManager;
 import com.sun.rowset.internal.InsertRow;
 import dbCommands.*;
 import dbEnvironment.DbContext;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import tableTypes.ColumnTuple;
@@ -51,6 +52,32 @@ public class HeapFileTests
 		tableDataFile.delete();
 	}
 
+//	@Test
+//	public void EmptyFileHeapFileTest()
+//	{
+//		DbContext context = new DbContext(RESOURCE_PATH);
+//
+//		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
+//		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
+//		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
+//		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
+//		tuples.add(columnTuple1);
+//		tuples.add(columnTuple2);
+//		tuples.add(columnTuple3);
+//		String tableName = "testTable";
+//		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
+//
+//		createTableCommand.executeCommand(context);
+//
+//		Table table = context.tables().get(tableName);
+//
+//		context.close();
+//
+//		HeapFile heapFile = new HeapFile(table.getDataFileName(), table.rowSignature());
+//
+//		Assert.assertEquals(2, heapFile.getNotFullPageIndex());
+//	}
+
 	@Test
 	public void VeryBasicInsertSelectTest()
 	{
@@ -83,7 +110,7 @@ public class HeapFileTests
 
 		selectOneRowCommand.executeCommand(context);
 
-		Assert.assertNotEquals(null, selectOneRowCommand.getResult());
+		ArrayList<Object> result = selectOneRowCommand.getResult();
 	}
 
 	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";

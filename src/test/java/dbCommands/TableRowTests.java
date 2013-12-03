@@ -36,8 +36,8 @@ public class TableRowTests
 		args.add(arg3);
 		int cumulativeLength = 0;
 		cumulativeLength += ByteConverter.intToByte(arg1).length;
-		cumulativeLength += ByteConverter.charsToByte(arg2.toCharArray(), rowSignature.get(1).size() - arg2.length() * ByteConverter.CHAR_LENGTH_IN_BYTES).length;
-		cumulativeLength += ByteConverter.charsToByte(arg3.toCharArray(), rowSignature.get(2).size() - arg2.length() * ByteConverter.CHAR_LENGTH_IN_BYTES).length;
+		cumulativeLength += ByteConverter.stringToBytes(arg2, rowSignature.get(1).size() - arg2.length() * ByteConverter.CHAR_LENGTH_IN_BYTES).length;
+		cumulativeLength += ByteConverter.stringToBytes(arg3, rowSignature.get(2).size() - arg3.length() * ByteConverter.CHAR_LENGTH_IN_BYTES).length;
 		Assert.assertEquals(rowSignatureSize, cumulativeLength);
 
 		TableRow tableRow = new TableRow(args);
@@ -46,9 +46,9 @@ public class TableRowTests
 		Assert.assertEquals(rowSignatureSize, actualResult.length);
 
 		byte[] expectedResult = ArrayUtils.addAll(ByteConverter.intToByte(arg1),
-			ByteConverter.charsToByte(arg2.toCharArray(), rowSignature.get(1).size() - arg2.length() * ByteConverter.CHAR_LENGTH_IN_BYTES));
+			ByteConverter.stringToBytes(arg2, rowSignature.get(1).size() - arg2.length() * ByteConverter.CHAR_LENGTH_IN_BYTES));
 
-		expectedResult = ArrayUtils.addAll(expectedResult, ByteConverter.charsToByte(arg3.toCharArray(), rowSignature.get(2).size() - arg2.length() * ByteConverter.CHAR_LENGTH_IN_BYTES));
+		expectedResult = ArrayUtils.addAll(expectedResult, ByteConverter.stringToBytes(arg3, rowSignature.get(2).size() - arg3.length() * ByteConverter.CHAR_LENGTH_IN_BYTES));
 
 		Assert.assertArrayEquals(expectedResult, actualResult);
 	}
