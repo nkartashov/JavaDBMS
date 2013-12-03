@@ -1,5 +1,6 @@
 package dbCommands;
 
+import org.apache.commons.lang3.ArrayUtils;
 import tableTypes.BaseTableType;
 import tableTypes.TableInt;
 
@@ -29,13 +30,13 @@ public class TableRow
 		return _arguments.get(pos).toCharArray();
 	}
 
-	public ArrayList<byte[]> getAsByteArray(ArrayList<BaseTableType> rowSignature)
+	public byte[] getAsByteArray(ArrayList<BaseTableType> rowSignature)
 	{
-		ArrayList<byte[]> result = new ArrayList<byte[]>();
+		byte[] result = rowSignature.get(0).getAsByte(this, 0);
 
-		for (int i = 0; i < _arguments.size(); ++i)
+		for (int i = 1; i < _arguments.size(); ++i)
 		{
-			result.add(rowSignature.get(i).getAsByte(this, i));
+			result = ArrayUtils.addAll(result, rowSignature.get(i).getAsByte(this, i));
 		}
 
 		return result;

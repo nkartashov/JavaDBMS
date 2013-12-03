@@ -1,5 +1,7 @@
 package utils;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
@@ -22,6 +24,11 @@ public class ByteConverter
 		return ByteBuffer.wrap(rawData, index, INT_LENGTH_IN_BYTES).getInt();
 	}
 
+	public static String stringFromBytes(byte[] rawData, int index, int length)
+	{
+		return new String(rawData, index, length);
+	}
+
 	public static byte[] longToByte(long item)
 	{
 		return ByteBuffer.allocate(LONG_LENGTH_IN_BYTES).putLong(item).array();
@@ -32,44 +39,30 @@ public class ByteConverter
 		return ByteBuffer.allocate(INT_LENGTH_IN_BYTES).putInt(item).array();
 	}
 
-	public static byte[] charsToByte(char[] item)
+	public static byte[] charsToByte(char[] item, int padding)
 	{
 		ByteBuffer result = ByteBuffer.allocate(CHAR_LENGTH_IN_BYTES * item.length);
 		for (int i = 0; i < item.length; ++i)
 			result.putChar(i, item[i]);
-		return result.array();
+		byte[] dataResult = result.array();
+		if (padding > 0)
+			dataResult = ArrayUtils.addAll(new byte[padding], dataResult);
+		return dataResult;
 	}
 
-	public static void intToBuffer(int item, byte[] buffer, int offset)
+	public static byte[] bitsetToBytes(BitSet b)
 	{
-		System.arraycopy(intToByte(item), 0, buffer, offset, INT_LENGTH_IN_BYTES);
+		return null;
 	}
 
-	public static void longToBuffer(long item, byte[] buffer, int offset)
+	public BitSet bitsetFromBytes(byte[] b)
 	{
-		System.arraycopy(longToByte(item), 0, buffer, offset, LONG_LENGTH_IN_BYTES);
+		return null;
 	}
-
-	public static void charsToBuffer(char[] item, byte[] buffer, int offset)
-	{
-		System.arraycopy(charsToByte(item), 0, buffer, offset, item.length * CHAR_LENGTH_IN_BYTES);
-	}
-
-    public static byte[] bitsetToBytes(BitSet item) {
-        byte[] bytes = new byte[(item.length() / 8) + 1];
-        for (int i = 0; i != bytes.length; ++i) {
-            bytes[i] = 0;
-        }
-        for (int i = 0; i != item.length(); ++i) {
-            if (item.get(i)) {
-                bytes[i / 8] |= 1 << (i % 8);
-            }
-        }
-        return bytes;
-    }
-
 
 	public static int LONG_LENGTH_IN_BYTES = 8;
 	public static int INT_LENGTH_IN_BYTES = 4;
 	public static int CHAR_LENGTH_IN_BYTES = 2;
+
+	public static int BITS_IN_BYTE = 8;
 }

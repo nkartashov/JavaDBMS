@@ -25,9 +25,9 @@ public abstract class BaseTableType {
         return String.valueOf(_size);
     }
 
-	public abstract void write(byte buffer[], int insideRowOffset, TableRow row, int columnPos);
-
 	public abstract byte[] getAsByte(TableRow row, int columnPos);
+
+	public abstract Object getAsObject(byte[] data, int offset, int size);
 
     private int _size;
 }

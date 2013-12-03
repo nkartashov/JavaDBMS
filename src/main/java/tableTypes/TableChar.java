@@ -26,15 +26,15 @@ public class TableChar extends BaseTableType {
     }
 
 	@Override
-	public void write(byte[] buffer, int insideRowOffset, TableRow row, int columnPos)
+	public byte[] getAsByte(TableRow row, int columnPos)
 	{
-		ByteConverter.charsToBuffer(row.getAsCharArray(columnPos), buffer, insideRowOffset);
+		char[] arrayToConvert = row.getAsCharArray(columnPos);
+		return ByteConverter.charsToByte(arrayToConvert, size() - arrayToConvert.length * ByteConverter.CHAR_LENGTH_IN_BYTES);
 	}
 
 	@Override
-	public byte[] getAsByte(TableRow row, int columnPos)
+	public Object getAsObject(byte[] data, int offset, int size)
 	{
-		return ByteConverter.charsToByte(row.getAsCharArray(columnPos));
+		return ByteConverter.stringFromBytes(data, offset, size);
 	}
-
 }

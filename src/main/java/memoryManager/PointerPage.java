@@ -67,6 +67,13 @@ public class PointerPage extends DiskPage
 			removeLastPointer();
 	}
 
+	public void removePointer(long pointer)
+	{
+		for (int i = 0; i < _pointersCount; ++i)
+			if (getPointer(i) == pointer)
+				removePointer(i);
+	}
+
 	public void removeLastPointer()
 	{
 		--_pointersCount;

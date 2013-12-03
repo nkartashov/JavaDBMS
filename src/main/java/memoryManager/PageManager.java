@@ -2,6 +2,8 @@ package memoryManager;
 
 import utils.Logger;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,6 +44,11 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
 			page.get();
 			put(pageId, page);
 			return newRawPage;
+		}
+		catch (FileNotFoundException e)
+		{
+			Logger.LogErrorMessage(e);
+			return null;
 		}
 		catch (Exception e)
 		{
@@ -156,7 +163,7 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
     }
 
 		// 64 * 1024 * 4K = 64 * 4M = 256M
-		private static final int MAX_PAGES = 64 * 1024;
+		private static final int MAX_PAGES = 10;//64 * 1024;
 
     private static PageManager _instance = new PageManager();
 }

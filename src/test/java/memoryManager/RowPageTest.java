@@ -4,6 +4,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+
 /**
  * Created with IntelliJ IDEA.
  * User: nikita_kartashov
@@ -18,11 +20,11 @@ public class RowPageTest
 	{
 		byte[] rawData = new byte[DiskPage.MAX_PAGE_SIZE];
 
-		RowPage page = new RowPage(rawData, true, 10);
+		byte[] dataPayload = {45, -127, -117, 32, 87, -11, 0, 1, 67, 89};
+
+		RowPage page = new RowPage(rawData, true, dataPayload.length);
 
 		Assert.assertFalse(page.isFull());
-
-		byte[] dataPayload = {45, -127, -117, 32, 87, -11, 0, 1, 67, 89};
 
 		page.putRow(dataPayload);
 
@@ -38,13 +40,6 @@ public class RowPageTest
 
 
 		Assert.assertEquals(1 + test, page.getRowsCount());
-		Assert.assertArrayEquals(newPayload, page.getRow(1));
-
-		byte[] newData = page.rawPage();
-
-		page = new RowPage(newData, false, 10);
-
-		Assert.assertEquals(1 + test, page.getRowsCount());
 		Assert.assertArrayEquals(dataPayload, page.getRow(0));
 		Assert.assertArrayEquals(newPayload, page.getRow(1));
 
@@ -52,5 +47,4 @@ public class RowPageTest
 
 		Assert.assertEquals(test, page.getRowsCount());
 	}
-
 }
