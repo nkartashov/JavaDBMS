@@ -13,6 +13,8 @@ public class InnerNodePage extends NodePage {
 
     public InnerNodePage(byte[] nodePageData, boolean page_is_new) {
         super(nodePageData, page_is_new);
+        byte[] page_type = ByteConverter.intToByte(TYPE);
+        System.arraycopy(page_type, 0, _node_page_data, PAGE_TYPE_OFFSET, ByteConverter.INT_LENGTH_IN_BYTES);
     }
 
     public long GetNextNodePointerForKey(int key) {
@@ -21,9 +23,11 @@ public class InnerNodePage extends NodePage {
             key_pos = _valid_keys.nextSetBit(key_pos + 1);
             int current_key = GetKey(key_pos);
             if (key < current_key) {
-                return GetPointerBeforeKey(key_pos);
+                return GetNodePointerBeforeKey(key_pos);
             }
         }
-        return GetLastPointer();
+        return GetLastNodePointer();
     }
+
+    static final int TYPE = 0;
 }
