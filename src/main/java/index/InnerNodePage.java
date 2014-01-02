@@ -1,6 +1,10 @@
 package index;
 
+import org.apache.commons.lang3.ArrayUtils;
 import utils.ByteConverter;
+
+import java.util.BitSet;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,6 +31,28 @@ public class InnerNodePage extends NodePage {
             }
         }
         return GetLastNodePointer();
+    }
+
+    public void Insert() {
+
+    }
+
+    static public void InitPage(byte[] node_page_data, InnerNodeInsertEntry insert_entry) {
+        byte[] page_type = ByteConverter.intToByte(TYPE);
+        byte[] num_of_valid_keys = ByteConverter.intToByte(1);
+        BitSet valid_keys_bitset = new BitSet(1);
+        valid_keys_bitset.set(0, 1, true);
+        byte[] valid_keys_table = ByteConverter.bitsetToBytes(valid_keys_bitset);
+
+        System.arraycopy(page_type, 0, node_page_data, PAGE_TYPE_OFFSET, page_type.length);
+        System.arraycopy(num_of_valid_keys, 0, node_page_data, NUM_OF_VALID_KEYS_OFFSET, num_of_valid_keys.length);
+        System.arraycopy(valid_keys_table, 0, node_page_data, VALID_KEYS_TABLE_OFFSET, valid_keys_table.length);
+
+        byte[] data = ArrayUtils.addAll(ByteConverter.longToByte(insert_entry.leftChildPtr()),
+                                        ByteConverter.intToByte(0));                          //0 - trash
+        data = ArrayUtils.addAll(data, ByteConverter.intToByte(insert_entry.key()));
+        data = ArrayUtils.addAll(data, ByteConverter.longToByte(insert_entry.rightChildPtr()));
+        System.arraycopy(data, 0, node_page_data, HEADER_SIZE, data.length);
     }
 
     static final int TYPE = 0;

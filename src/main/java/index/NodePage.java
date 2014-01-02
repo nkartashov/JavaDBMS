@@ -1,9 +1,7 @@
 package index;
 
-import org.apache.commons.lang3.ArrayUtils;
 import utils.ByteConverter;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -46,9 +44,10 @@ public class NodePage {
 
     protected long GetNodePointerBeforeKey (int key_index_in_valid_keys_bitset) {
         int pointer_offset = HEADER_SIZE + key_index_in_valid_keys_bitset*(KEY_SIZE + POINTER_SIZE);
-        byte[] buffer = new byte[POINTER_SIZE];
-        System.arraycopy(_node_page_data, pointer_offset, buffer, 0, POINTER_SIZE);
-        return ByteConverter.longFromByte(buffer, 0);
+//        byte[] buffer = new byte[POINTER_SIZE];
+//        System.arraycopy(_node_page_data, pointer_offset, buffer, 0, POINTER_SIZE);
+//        return ByteConverter.longFromByte(buffer, 0);
+        return ByteConverter.longFromByte(_node_page_data, pointer_offset);
     }
 
     protected long GetLastNodePointer () {
@@ -65,6 +64,8 @@ public class NodePage {
     protected void DumpChanges () {
         byte[] valid_keys_table = ByteConverter.bitsetToBytes(_valid_keys);
         System.arraycopy(valid_keys_table, 0, _node_page_data, VALID_KEYS_TABLE_OFFSET, VALID_KEYS_TABLE_SIZE);
+        byte[] num_of_valid_keys = ByteConverter.intToByte(_num_of_valid_keys);
+        System.arraycopy(num_of_valid_keys, 0, _node_page_data, NUM_OF_VALID_KEYS_OFFSET, num_of_valid_keys.length);
     }
 
     static public int GetPageType(byte[] raw_node_page) {
@@ -72,9 +73,9 @@ public class NodePage {
     }
 
     protected void SortEntries() {
-        List<NodePageEntry> all_entries = GetEntriesList();
-        Collections.sort(all_entries, new Comparator<NodePageEntry>() {
-            public int compare(NodePageEntry e1, NodePageEntry e2) {
+        List<LeafNodeEntry> all_entries = GetEntriesList();
+        Collections.sort(all_entries, new Comparator<LeafNodeEntry>() {
+            public int compare(LeafNodeEntry e1, LeafNodeEntry e2) {
                 if(e1.Key() > e2.Key()) { return 1; } else if (e1.Key() < e2.Key()) { return -1; }
                 return 0;
             }
@@ -84,12 +85,12 @@ public class NodePage {
         for(int i = 0; i != _num_of_valid_keys; ++i) { _valid_keys.set(i, true); }
     }
 
-    protected List<NodePageEntry> GetEntriesList() {
-        List<NodePageEntry> entries_list = new ArrayList<NodePageEntry>();
+    protected List<LeafNodeEntry> GetEntriesList() {
+        List<LeafNodeEntry> entries_list = new ArrayList<LeafNodeEntry>();
         int next_entry_pos = _valid_keys.nextSetBit(0);
         while(next_entry_pos != -1) {
             byte[] raw_entry = GetRawEntry(next_entry_pos);
-            entries_list.add(new NodePageEntry(raw_entry));
+            entries_list.add(new LeafNodeEntry(raw_entry));
             next_entry_pos = _valid_keys.nextSetBit(next_entry_pos + 1);
         }
         return entries_list;
@@ -98,15 +99,12 @@ public class NodePage {
     private byte[] GetRawEntry(int key) {
         int pointer_offset = HEADER_SIZE + key*(KEY_SIZE + POINTER_SIZE);
         byte[] buffer = new byte[POINTER_SIZE + KEY_SIZE];
-        System.arraycopy(_node_page_data, pointer_offset, buffer, 0,POINTER_SIZE + KEY_SIZE);
+        System.arraycopy(_node_page_data, pointer_offset, buffer, 0, POINTER_SIZE + KEY_SIZE);
         return buffer;
     }
 
-    protected void WriteEntriesList(List<NodePageEntry> list) {
-        byte[] raw_all_entries = null;
-        for(int i = 0; i != list.size(); ++i) {
-            raw_all_entries = ArrayUtils.addAll(raw_all_entries, list.get(i).FullEntry());
-        }
+    protected void WriteEntriesList(List<LeafNodeEntry> list) {
+        byte[] raw_all_entries = ByteConverter.leafEntriesToBytes(list);
         System.arraycopy(raw_all_entries, 0, _node_page_data, HEADER_SIZE, raw_all_entries.length);
     }
 
@@ -124,15 +122,3 @@ public class NodePage {
     static protected final int VALID_KEYS_TABLE_OFFSET = NUM_OF_VALID_KEYS_OFFSET + ByteConverter.INT_LENGTH_IN_BYTES;
     static protected final int VALID_KEYS_TABLE_SIZE = (int) Math.ceil(KEYS_MAX_NUM / 8.0);
 }
-
-//    public void DeleteKey(int key) {
-//        for(int i = 0; i != KEYS_MAX_NUM; ++i) {
-//            if (_valid_keys.get(i) == true) {
-//                int current_key_offset = HEADER_SIZE + POINTER_SIZE + i*(KEY_SIZE + POINTER_SIZE);
-//                int current_key = ByteConverter.intFromByte(_nodePageData, current_key_offset);
-//                if(key == current_key) {
-//                    _valid_keys.set();
-//                }
-//            }
-//        }
-//    }

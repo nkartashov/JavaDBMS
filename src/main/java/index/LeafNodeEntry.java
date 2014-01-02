@@ -9,9 +9,9 @@ import utils.ByteConverter;
  * Time: 2:09 AM
  * To change this template use File | Settings | File Templates.
  */
-public class NodePageEntry {
+public class LeafNodeEntry {
 
-    public NodePageEntry(byte[] full_entry) {
+    public LeafNodeEntry(byte[] full_entry) {
         _full_entry = full_entry;
         _key = ByteConverter.intFromByte(full_entry, NodePage.POINTER_SIZE);
     }
