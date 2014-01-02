@@ -1,5 +1,6 @@
 package memoryManager;
 
+import utils.BitArray;
 import utils.ByteIterator;
 
 import java.util.ArrayList;
@@ -23,14 +24,11 @@ public class RowPage extends DiskPage
 
 		_rowSize = rowSize;
 		_rowsOnPage = min(DATA_PAGE_SIZE_IN_BYTES / _rowSize, MAX_ROWS_ON_PAGE);
-		_isOccupied = new BitSet(BIT_MASK_SIZE_IN_BITS);
-		_isOccupied.clear();
+		_isOccupied = new BitArray(BIT_MASK_SIZE_IN_BITS);
 
 		if (!blankPage)
 		{
-			byte[] bitsetData = new byte[BIT_MASK_SIZE_IN_BYTES];
-			System.arraycopy(_rawPage, BIT_MASK_OFFSET, bitsetData, 0, BIT_MASK_SIZE_IN_BYTES);
-			_isOccupied = BitSet.valueOf(bitsetData);
+			_isOccupied = BitArray.readBitArray(_rawPage, BIT_MASK_OFFSET, BIT_MASK_SIZE_IN_BYTES);
 		}
 	}
 
@@ -58,9 +56,19 @@ public class RowPage extends DiskPage
 		return _isOccupied.cardinality() == _rowsOnPage;
 	}
 
+	public boolean isEmpty()
+	{
+		return _isOccupied.cardinality() == 0;
+	}
+
 	public int firstEmptyRowIndex()
 	{
 		return _isOccupied.nextClearBit(0);
+	}
+
+	public int firstOccupiedRowIndex()
+	{
+		return _isOccupied.nextSetBit(0);
 	}
 
 	public void putRow(byte[] rowData)
@@ -75,17 +83,17 @@ public class RowPage extends DiskPage
 
 	private void updateOccupiedSet()
 	{
-		byte[] bytes = _isOccupied.toByteArray();
-		System.arraycopy(bytes, 0, _rawPage, BIT_MASK_OFFSET, bytes.length);
+		_isOccupied.writeBitArray(_rawPage, BIT_MASK_OFFSET);
 	}
 
-	private BitSet _isOccupied;
+	private BitArray _isOccupied;
 	private int _rowSize;
 	private int _rowsOnPage;
 
-	private static int BIT_MASK_OFFSET = 16;
-	private static int BIT_MASK_SIZE_IN_BITS = 128;
-	private static int BIT_MASK_SIZE_IN_BYTES = 128 / 8;
-	private static int DATA_PAGE_SIZE_IN_BYTES = 4000;
-	private static int MAX_ROWS_ON_PAGE = 100;
+
+	private static final int BIT_MASK_OFFSET = 16;
+	private static final int BIT_MASK_SIZE_IN_BITS = 400;
+	private static final int BIT_MASK_SIZE_IN_BYTES = BIT_MASK_SIZE_IN_BITS / 8;
+	private static final int DATA_PAGE_SIZE_IN_BYTES = 4000;
+	private static final int MAX_ROWS_ON_PAGE = DATA_PAGE_SIZE_IN_BYTES / 4; // size of int
 }

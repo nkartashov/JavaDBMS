@@ -10,7 +10,7 @@ import org.junit.Test;
  * Time: 17:49
  * To change this template use File | Settings | File Templates.
  */
-public class DiskPageTest
+public class DiskPageTests
 {
 
 	@Test

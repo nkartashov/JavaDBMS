@@ -23,103 +23,113 @@ public class HeapFile
 			_rowSize += type.size();
 	}
 
-
-	public void insertRows(ArrayList<TableRow> rows)
-	{
-		PageId notFullPage  = localPageId(getLastNotFullPageIndex());
-
-
-	}
-
-	public static void seedDataFile(String filePath, ArrayList<BaseTableType> rowSignature)
+	public static void seedDataFile(String filePath)
 	{
 		PageId firstNotFullPageId = new PageId(filePath, FIRST_NOT_FULL_PAGE_INDEX);
 		byte[] firstNotFullRawPage = _pageManager.createPage(firstNotFullPageId);
+		if (firstNotFullRawPage == null)
+			return;
 		PointerPage firstNotFullPage = new PointerPage(firstNotFullRawPage, true);
 
 		_pageManager.updateAndReleasePage(firstNotFullPageId, firstNotFullPage.rawPage());
 
 		PageId secondFullPageId = new PageId(filePath, FIRST_FULL_PAGE_INDEX);
 		byte[] secondFullRawPage = _pageManager.createPage(secondFullPageId);
+		if (secondFullRawPage == null)
+			return;
 		PointerPage secondFullPage = new PointerPage(secondFullRawPage, true);
 
 		_pageManager.updateAndReleasePage(secondFullPageId, secondFullPage.rawPage());
 	}
 
-	private void insertRow(TableRow row)
+	public void insertRow(TableRow row)
 	{
-		PageId notFullPointerPageId = localPageId(_lastPointerNotFullPageIndex);
-		RowPage notFullPage = new RowPage(_pageManager.getPage(notFullPointerPageId), false, _rowSize);
+		PageId notFullPageId = localPageId(getNotFullPageIndex());
+		RowPage notFullPage = new RowPage(_pageManager.getPage(notFullPageId), false, _rowSize);
 
 		try
 		{
-			ArrayList<byte[]> byteRow = row.getAsByteArray(_rowSignature);
+			byte[] byteRow = row.getAsByteArray(_rowSignature);
+			notFullPage.putRow(byteRow);
 
-		}
-		finally
-		{
-			_pageManager.updateAndReleasePage(notFullPointerPageId, notFullPage.rawPage());
-		}
-	}
-
-
-	private long getLastNotFullPageIndex()
-	{
-		if (_lastPointerNotFullPageIndex == DiskPage.NULL_PTR)
-			getLastPointerNotFullPageIndex();
-
-		PageId notFullPointerPageId = localPageId(_lastPointerNotFullPageIndex);
-		PointerPage notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
-		_pageManager.releasePage(notFullPointerPageId);
-
-		long notFullPageIndex = notFullPointerPage.getLastPointer();
-		if (notFullPageIndex != -1)
-			return notFullPageIndex;
-
-		PageId notFullPageId = blankLocalPageId();
-		byte[] newPage = _pageManager.createPage(notFullPageId);
-		RowPage.initHeader(newPage);
-		_pageManager.updateAndReleasePage(notFullPageId, newPage);
-
-		addNotFullPointer(notFullPointerPageId.getPageNumber());
-
-		return notFullPageId.getPageNumber();
-	}
-
-	private long getLastFullPageIndex()
-	{
-		if (_lastPointerFullPageIndex == DiskPage.NULL_PTR)
-			getLastPointerFullPageIndex();
-
-		PageId fullPointerPageId = localPageId(_lastPointerFullPageIndex);
-		PointerPage fullPointerPage = new PointerPage(_pageManager.getPage(fullPointerPageId), false);
-		_pageManager.releasePage(fullPointerPageId);
-
-		return fullPointerPage.getLastPointer();
-	}
-
-	private void getLastPointerNotFullPageIndex()
-	{
-		PageId notFullPointerPageId = localPageId(FIRST_NOT_FULL_PAGE_INDEX);
-		PointerPage notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
-
-		try
-		{
-			while (notFullPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
+			if (notFullPage.isFull())
 			{
-				_pageManager.releasePage(notFullPointerPageId);
-				notFullPointerPageId = localPageId(notFullPointerPage.nextPageIndex());
-				notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
+				addFullPointer(notFullPageId.getPageNumber());
+				removeNotFullPointerFromLastPage(notFullPageId.getPageNumber());
 			}
-			_lastPointerNotFullPageIndex = notFullPointerPageId.getPageNumber();
 		}
 		finally
 		{
-			_pageManager.releasePage(notFullPointerPageId);
+			_pageManager.updateAndReleasePage(notFullPageId, notFullPage.rawPage());
 		}
 	}
 
-	private void getLastPointerFullPageIndex()
+	public ArrayList<Object> selectRow()
+	{
+		ArrayList<Object> result = null;
+		PageId notEmptyPageId = null;
+
+		PageId fullPointerPageId = localPageId(FIRST_FULL_PAGE_INDEX);
+		PointerPage fullPointerPage = new PointerPage(_pageManager.getPage(fullPointerPageId), false);
+
+		try
+		{
+			if (!fullPointerPage.isEmpty())
+				notEmptyPageId = localPageId(fullPointerPage.getLastPointer());
+		}
+		finally
+		{
+			_pageManager.releasePage(fullPointerPageId);
+		}
+
+
+		if (notEmptyPageId == null)
+		{
+			PageId notFullPointerPageId = localPageId(FIRST_NOT_FULL_PAGE_INDEX);
+			PointerPage notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
+
+			try
+			{
+				if (!notFullPointerPage.isEmpty())
+					notEmptyPageId = localPageId(notFullPointerPage.getLastPointer());
+			}
+			finally
+			{
+				_pageManager.releasePage(fullPointerPageId);
+			}
+
+		}
+
+		if (notEmptyPageId != null)
+		{
+			RowPage notEmptyPage = new RowPage(_pageManager.getPage(notEmptyPageId), false, _rowSize);
+
+			try
+			{
+				if (!notEmptyPage.isEmpty())
+				{
+					byte[] rowData = notEmptyPage.getRow(notEmptyPage.firstOccupiedRowIndex());
+					int byteOffset = 0;
+
+					result = new ArrayList<Object>();
+
+					for (BaseTableType type : _rowSignature)
+					{
+						result.add(type.getAsObject(rowData, byteOffset, type.size()));
+						byteOffset += type.size();
+					}
+				}
+			}
+			finally
+			{
+				_pageManager.releasePage(notEmptyPageId);
+			}
+		}
+
+		return result;
+	}
+
+	private long getLastPointerFullPageIndex()
 	{
 		PageId fullPointerPageId = localPageId(FIRST_FULL_PAGE_INDEX);
 		PointerPage fullPointerPage = new PointerPage(_pageManager.getPage(fullPointerPageId), false);
@@ -132,7 +142,7 @@ public class HeapFile
 				fullPointerPageId = localPageId(fullPointerPage.nextPageIndex());
 				fullPointerPage = new PointerPage(_pageManager.getPage(fullPointerPageId), false);
 			}
-			_lastPointerFullPageIndex = fullPointerPageId.getPageNumber();
+			return fullPointerPageId.getPageNumber();
 		}
 		finally
 		{
@@ -140,40 +150,11 @@ public class HeapFile
 		}
 	}
 
-	private void addNotFullPointer(long pointer)
-	{
-		PageId notFullPointerPageId = localPageId(_lastPointerNotFullPageIndex);
-		PointerPage notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
-
-		try
-		{
-			if (!notFullPointerPage.isFull())
-				notFullPointerPage.addPointer(pointer);
-			else
-			{
-				PageId newNotFullPointerPageId = blankLocalPageId();
-				PointerPage newPage = new PointerPage(_pageManager.createPage(newNotFullPointerPageId), true);
-
-				try
-				{
-					newPage.addPointer(pointer);
-					notFullPointerPage.setNextPageIndex(newNotFullPointerPageId.getPageNumber());
-				}
-				finally
-				{
-					_pageManager.updateAndReleasePage(newNotFullPointerPageId, newPage.rawPage());
-				}
-			}
-		}
-		finally
-		{
-			_pageManager.updateAndReleasePage(notFullPointerPageId, notFullPointerPage.rawPage());
-		}
-	}
-
 	private void addFullPointer(long pointer)
 	{
-		PageId fullPointerPageId = localPageId(_lastPointerFullPageIndex);
+		long lastFullPointerPageIndex = getLastPointerFullPageIndex();
+
+		PageId fullPointerPageId = localPageId(lastFullPointerPageIndex);
 		PointerPage fullPointerPage = new PointerPage(_pageManager.getPage(fullPointerPageId), false);
 
 		try
@@ -202,6 +183,98 @@ public class HeapFile
 		}
 	}
 
+	public void removeNotFullPointerFromLastPage(long pointer)
+	{
+		long lastPointerNotFullPageIndex = getLastPointerFullPageIndex();
+		PageId notFullPointerPageId = localPageId(lastPointerNotFullPageIndex);
+		PointerPage notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
+
+		try
+		{
+			notFullPointerPage.removePointer(pointer);
+		}
+		finally
+		{
+			_pageManager.updateAndReleasePage(notFullPointerPageId, notFullPointerPage.rawPage());
+		}
+	}
+
+	public long getNotFullPageIndex()
+	{
+		long lastNotFullPointerPage = getNotFullPointerPage();
+
+		PageId notFullPointerPageId = localPageId(lastNotFullPointerPage);
+		PointerPage notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
+		_pageManager.releasePage(notFullPointerPageId);
+
+		long notFullPageIndex = notFullPointerPage.getLastPointer();
+		if (notFullPageIndex != -1)
+			return notFullPageIndex;
+
+		PageId notFullPageId = blankLocalPageId();
+		byte[] newPage = _pageManager.createPage(notFullPageId);
+		RowPage.initHeader(newPage);
+		_pageManager.updateAndReleasePage(notFullPageId, newPage);
+
+		addNotFullPointer(notFullPageId.getPageNumber());
+
+		return notFullPageId.getPageNumber();
+	}
+
+
+	public long getNotFullPointerPage()
+	{
+		PageId notFullPointerPageId = localPageId(FIRST_NOT_FULL_PAGE_INDEX);
+		PointerPage notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
+
+		try
+		{
+			while (notFullPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
+			{
+				_pageManager.releasePage(notFullPointerPageId);
+				notFullPointerPageId = localPageId(notFullPointerPage.nextPageIndex());
+				notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
+			}
+			return notFullPointerPageId.getPageNumber();
+		}
+		finally
+		{
+			_pageManager.releasePage(notFullPointerPageId);
+		}
+	}
+
+	private void addNotFullPointer(long pointer)
+	{
+		long lastNotFullPointerPage = getNotFullPointerPage();
+
+		PageId notFullPointerPageId = localPageId(lastNotFullPointerPage);
+		PointerPage notFullPointerPage = new PointerPage(_pageManager.getPage(notFullPointerPageId), false);
+
+		try
+		{
+			if (!notFullPointerPage.isFull())
+				notFullPointerPage.addPointer(pointer);
+			else
+			{
+				PageId newNotFullPointerPageId = blankLocalPageId();
+				PointerPage newPage = new PointerPage(_pageManager.createPage(newNotFullPointerPageId), true);
+
+				try
+				{
+					newPage.addPointer(pointer);
+					notFullPointerPage.setNextPageIndex(newNotFullPointerPageId.getPageNumber());
+				}
+				finally
+				{
+					_pageManager.updateAndReleasePage(newNotFullPointerPageId, newPage.rawPage());
+				}
+			}
+		}
+		finally
+		{
+			_pageManager.updateAndReleasePage(notFullPointerPageId, notFullPointerPage.rawPage());
+		}
+	}
 
 	private PageId localPageId(long pageIndex) {return new PageId(_filePath, pageIndex);}
 

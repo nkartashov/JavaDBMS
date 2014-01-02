@@ -28,7 +28,8 @@ public class InsertRowsCommand implements DbCommand
 	    HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToInsertInto.getRelativeDataPath(),
 		    tableToInsertInto.rowSignature());
 
-	    tableHeapFile.insertRows(_rows);
+	    for (TableRow row: _rows)
+	        tableHeapFile.insertRow(row);
     }
 
     private String _tableName;

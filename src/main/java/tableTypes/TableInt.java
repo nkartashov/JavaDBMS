@@ -23,14 +23,14 @@ public class TableInt extends BaseTableType {
     }
 
 	@Override
-	public void write(byte[] buffer, int insideRowOffset, TableRow row, int columnPos)
-	{
-		ByteConverter.intToBuffer(row.getAsInt(columnPos), buffer, insideRowOffset);
-	}
-
-	@Override
 	public byte[] getAsByte( TableRow row, int columnPos)
 	{
 		return ByteConverter.intToByte(row.getAsInt(columnPos));
+	}
+
+	@Override
+	public Object getAsObject(byte[] data, int offset, int size)
+	{
+		return ByteConverter.intFromByte(data, offset);
 	}
 }
