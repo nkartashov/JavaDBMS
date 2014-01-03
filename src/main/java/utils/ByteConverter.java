@@ -1,9 +1,11 @@
 package utils;
 
+import index.LeafNodeEntry;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -62,6 +64,14 @@ public class ByteConverter
 	{
 		return null;
 	}
+
+    static public byte[] leafEntriesToBytes(List<LeafNodeEntry> entry_list) {
+        byte[] buffer = null;
+        for (LeafNodeEntry entry : entry_list) {
+            buffer = ArrayUtils.addAll(buffer, entry.FullEntry());
+        }
+        return buffer;
+    }
 
 	public static int LONG_LENGTH_IN_BYTES = 8;
 	public static int INT_LENGTH_IN_BYTES = 4;

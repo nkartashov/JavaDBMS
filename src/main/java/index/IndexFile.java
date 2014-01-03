@@ -50,8 +50,7 @@ public class IndexFile {
 
     private InnerNodeInsertEntry InsertInBTree(int key, TableEntryPointer table_entry_pointer, PageId page_id) {
         byte[] node_raw_page = _page_manager.getPage(page_id);
-        int page_type = NodePage.GetPageType(node_raw_page);
-        if (page_type == LeafNodePage.TYPE) {
+        if (NodePage.GetPageType(node_raw_page) == LeafNodePage.TYPE) {
             LeafNodePage leaf_node = new LeafNodePage(node_raw_page, false);
             List<LeafNodeEntry> new_page_entries = leaf_node.Insert(key, table_entry_pointer);
             if(new_page_entries != null) {
@@ -68,7 +67,6 @@ public class IndexFile {
             return new InnerNodeInsertEntry();
         }
         InnerNodePage cur_node = new InnerNodePage (node_raw_page, false);
-
         InnerNodeInsertEntry insert_entry = InsertInBTree(key,
                                                           table_entry_pointer,
                                                           new PageId(_file_name, cur_node.GetNextNodePointerForKey(key)));
