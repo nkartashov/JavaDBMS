@@ -10,13 +10,13 @@ import utils.ByteConverter;
  * Time: 1:05 AM
  * To change this template use File | Settings | File Templates.
  */
-public class TableEntryPointer {
+public class TableEntryPtr {
 
-    public TableEntryPointer () {
+    public TableEntryPtr() {
         _is_null = true;
     }
 
-    public void SetPointer (byte[] entry_pointer) {
+    public void setPointer(byte[] entry_pointer) {
         if (entry_pointer.length != 0) {
             _page_pointer = ByteConverter.longFromByte(entry_pointer, 0);
             _row_pointer = ByteConverter.intFromByte(entry_pointer, ByteConverter.LONG_LENGTH_IN_BYTES);
@@ -27,12 +27,12 @@ public class TableEntryPointer {
         }
     }
 
-    public byte[] ToByteArray() {
+    public byte[] toByteArray() {
         return ArrayUtils.addAll(ByteConverter.longToByte(_page_pointer), ByteConverter.intToByte(_row_pointer));
     }
 
-    public long GetPagePointer () { return  _page_pointer; }
-    public int GetRowPointer () { return _row_pointer; }
+    public long getPagePointer () { return  _page_pointer; }
+    public int getRowPointer () { return _row_pointer; }
 
     public boolean _is_null;
 
