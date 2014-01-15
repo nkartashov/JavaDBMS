@@ -38,7 +38,7 @@ public class LeafNodePage extends NodePage {
     public TableEntryPtr deleteKey(int key_to_be_deleted) {
         int key_pos = tryFindKeyIndex(key_to_be_deleted);
         if (key_pos != -1) {
-            _valid_keys.set(key_pos, false);
+            _valid_keys.clear(key_pos);
             _num_of_valid_keys -= 1;
             dumpChanges();
         }

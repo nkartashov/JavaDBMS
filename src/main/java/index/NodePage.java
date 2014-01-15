@@ -1,6 +1,7 @@
 package index;
 
 import org.apache.commons.lang3.ArrayUtils;
+import utils.BitArray;
 import utils.ByteConverter;
 
 import java.util.*;
@@ -20,13 +21,13 @@ public class NodePage {
         if(page_is_new) {
             initHeader(_node_page_data, 0);
             _num_of_valid_keys = 0;
-            _valid_keys = new BitSet(KEYS_MAX_NUM);
+            _valid_keys = new BitArray(KEYS_MAX_NUM);
         }
         else {
             _num_of_valid_keys = ByteConverter.intFromByte(nodePageData, NUM_OF_VALID_KEYS_OFFSET);
             byte[] valid_keys_table = new byte[VALID_KEYS_TABLE_SIZE];
             System.arraycopy(_node_page_data, VALID_KEYS_TABLE_OFFSET, valid_keys_table, 0, VALID_KEYS_TABLE_SIZE);
-            _valid_keys = BitSet.valueOf(valid_keys_table);
+            _valid_keys = new BitArray(valid_keys_table);
         }
     }
 
@@ -69,7 +70,7 @@ public class NodePage {
     }
 
     protected void dumpChanges() {
-        byte[] valid_keys_table = ByteConverter.bitsetToBytes(_valid_keys);
+        byte[] valid_keys_table = _valid_keys.toByteArray();
         System.arraycopy(valid_keys_table, 0, _node_page_data, VALID_KEYS_TABLE_OFFSET, VALID_KEYS_TABLE_SIZE);
         byte[] num_of_valid_keys = ByteConverter.intToByte(_num_of_valid_keys);
         System.arraycopy(num_of_valid_keys, 0, _node_page_data, NUM_OF_VALID_KEYS_OFFSET, num_of_valid_keys.length);
@@ -79,30 +80,6 @@ public class NodePage {
         return ByteConverter.intFromByte(raw_node_page, PAGE_TYPE_OFFSET);
     }
 
-    protected void SortEntries() {
-        List<LeafNodeEntry> all_entries = GetEntriesList();
-        Collections.sort(all_entries, new Comparator<LeafNodeEntry>() {
-            public int compare(LeafNodeEntry e1, LeafNodeEntry e2) {
-                if(e1.Key() > e2.Key()) { return 1; } else if (e1.Key() < e2.Key()) { return -1; }
-                return 0;
-            }
-        });
-        WriteEntriesList(all_entries);
-        _valid_keys.clear();
-        for(int i = 0; i != _num_of_valid_keys; ++i) { _valid_keys.set(i, true); }
-    }
-
-    protected List<LeafNodeEntry> GetEntriesList() {
-        List<LeafNodeEntry> entries_list = new ArrayList<LeafNodeEntry>();
-        int next_entry_pos = _valid_keys.nextSetBit(0);
-        while(next_entry_pos != -1) {
-            byte[] raw_entry = getRawEntry(next_entry_pos);
-            entries_list.add(new LeafNodeEntry(raw_entry));
-            next_entry_pos = _valid_keys.nextSetBit(next_entry_pos + 1);
-        }
-        return entries_list;
-    }
-
     protected byte[] getRawEntry(int key) {
         int pointer_offset = HEADER_SIZE + key*(KEY_SIZE + POINTER_SIZE);
         byte[] buffer = new byte[POINTER_SIZE + KEY_SIZE];
@@ -110,10 +87,10 @@ public class NodePage {
         return buffer;
     }
 
-    protected void WriteEntriesList(List<LeafNodeEntry> list) {
-        byte[] raw_all_entries = ByteConverter.leafEntriesToBytes(list);
-        System.arraycopy(raw_all_entries, 0, _node_page_data, HEADER_SIZE, raw_all_entries.length);
-    }
+//    protected void WriteEntriesList(List<LeafNodeEntry> list) {
+//        byte[] raw_all_entries = ByteConverter.leafEntriesToBytes(list);
+//        System.arraycopy(raw_all_entries, 0, _node_page_data, HEADER_SIZE, raw_all_entries.length);
+//    }
 
     protected boolean isFull() {
         return _valid_keys.cardinality() == KEYS_MAX_NUM;
@@ -127,9 +104,14 @@ public class NodePage {
                          lastEntryPos() + POINTER_SIZE + KEY_SIZE);
 
         BitSet val_keys_copy = BitSet.valueOf(_valid_keys.toByteArray());
-        _valid_keys.set(from_pos, false);
+        _valid_keys.clear(from_pos);
         for (int i = from_pos + 1; i < lastEntryPos() + 1; ++i) {
-            _valid_keys.set(i, val_keys_copy.get(i - 1));
+            if(val_keys_copy.get(i - 1)) {
+                _valid_keys.set(i);
+            }
+            else {
+                _valid_keys.clear(i);
+            }
         }
     }
 
@@ -162,7 +144,7 @@ public class NodePage {
     public void reInit(byte[] data, int keys_num) {
         _num_of_valid_keys = keys_num;
         _valid_keys.clear();
-        _valid_keys.set(0, keys_num, true);
+        _valid_keys.set(0, keys_num);
         System.arraycopy(data, 0, _node_page_data, HEADER_SIZE, data.length);
         dumpChanges();
     }
@@ -170,7 +152,7 @@ public class NodePage {
     protected byte[] split() {
         int middle = KEYS_MAX_NUM / 2;
         _num_of_valid_keys -= KEYS_MAX_NUM - middle;
-        _valid_keys.set(middle, _num_of_valid_keys, false);
+        _valid_keys.clear(middle, _num_of_valid_keys);
         dumpChanges();
         byte[] second_part = new byte[KEYS_MAX_NUM - middle];
         System.arraycopy(_node_page_data, middle, second_part, 0, KEYS_MAX_NUM - middle);
@@ -182,7 +164,7 @@ public class NodePage {
         if(insert_pos == -1) {
             return;
         }
-        _valid_keys.set(insert_pos, true);
+        _valid_keys.set(insert_pos);
         ++_num_of_valid_keys;
         dumpChanges();
         System.arraycopy(data, 0, _node_page_data, insert_pos, data.length);
@@ -196,7 +178,7 @@ public class NodePage {
         byte[] last_entry = null;
         if (last_key > key) {
             last_entry = getRawEntry(lastEntryPos());
-            _valid_keys.set(lastEntryPos(), false);
+            _valid_keys.clear(lastEntryPos());
             --_num_of_valid_keys;
             insertNotFull(key, data);
         }
@@ -208,7 +190,7 @@ public class NodePage {
     }
 
     protected byte[] _node_page_data;
-    protected BitSet _valid_keys;
+    protected BitArray _valid_keys;
     protected int _num_of_valid_keys;
     public long _self_ptr;
 
@@ -222,3 +204,27 @@ public class NodePage {
     static protected final int VALID_KEYS_TABLE_OFFSET = NUM_OF_VALID_KEYS_OFFSET + ByteConverter.INT_LENGTH_IN_BYTES;
     static protected final int VALID_KEYS_TABLE_SIZE = (int) Math.ceil(KEYS_MAX_NUM / 8.0);
 }
+
+//    protected void SortEntries() {
+//        List<LeafNodeEntry> all_entries = GetEntriesList();
+//        Collections.sort(all_entries, new Comparator<LeafNodeEntry>() {
+//            public int compare(LeafNodeEntry e1, LeafNodeEntry e2) {
+//                if(e1.Key() > e2.Key()) { return 1; } else if (e1.Key() < e2.Key()) { return -1; }
+//                return 0;
+//            }
+//        });
+//        WriteEntriesList(all_entries);
+//        _valid_keys.clear();
+//        for(int i = 0; i != _num_of_valid_keys; ++i) { _valid_keys.set(i, true); }
+//    }
+
+//    protected List<LeafNodeEntry> GetEntriesList() {
+//        List<LeafNodeEntry> entries_list = new ArrayList<LeafNodeEntry>();
+//        int next_entry_pos = _valid_keys.nextSetBit(0);
+//        while(next_entry_pos != -1) {
+//            byte[] raw_entry = getRawEntry(next_entry_pos);
+//            entries_list.add(new LeafNodeEntry(raw_entry));
+//            next_entry_pos = _valid_keys.nextSetBit(next_entry_pos + 1);
+//        }
+//        return entries_list;
+//    }

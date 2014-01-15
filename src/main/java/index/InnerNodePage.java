@@ -50,7 +50,7 @@ public class InnerNodePage extends NodePage {
     }
 
     public void deleteLastEntry() {
-        _valid_keys.set(lastEntryPos(), false);
+        _valid_keys.clear(lastEntryPos());
     }
 
     static private void initHeaderAndType(byte[] node_page_data, int entries_num) {
