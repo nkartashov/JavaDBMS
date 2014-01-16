@@ -1,11 +1,8 @@
 package utils;
 
-import index.LeafNodeEntry;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
-import java.util.BitSet;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,7 +45,7 @@ public class ByteConverter
 		result[0] = (byte) bytes.length;
 		assert bytes.length <= Byte.MAX_VALUE;
 		return ArrayUtils.addAll(ArrayUtils.addAll(result, bytes),
-			new byte[length - item.length() -1]);
+			new byte[length - item.length() - 1]);
 	}
 
 	public static int LONG_LENGTH_IN_BYTES = 8;
