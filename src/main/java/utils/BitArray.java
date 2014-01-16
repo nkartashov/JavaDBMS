@@ -38,12 +38,34 @@ public class BitArray
 		_bytes[index / ByteConverter.BITS_IN_BYTE] |= leftShiftOne(bitIndex(index));
 	}
 
+    //Sets the bits from the specified from_index (inclusive) to the specified to_index (exclusive)
+    public void set(int from_index, int to_index) {
+        for(int i = from_index; i < to_index; ++i) {
+            set(i);
+        }
+    }
+
 	public void clear(int index)
 	{
 		if (isSet(index))
 			--_setBits;
 		_bytes[index / ByteConverter.BITS_IN_BYTE] &= ~(leftShiftOne(bitIndex(index)));
 	}
+
+    //Clears the bits from the specified from_index (inclusive) to the specified to_index (exclusive)
+    public void clear(int from_index, int to_index) {
+        for(int i = from_index; i < to_index; ++i) {
+            clear(i);
+        }
+    }
+
+    //Sets all bits to 0
+    public void clear() {
+        for (int i = 0; i < _bytes.length; ++i) {
+            _bytes[i] = 0;
+        }
+        _setBits = 0;
+    }
 
 	public int nextClearBit(int index)
 	{
