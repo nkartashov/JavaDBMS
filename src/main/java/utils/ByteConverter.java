@@ -55,24 +55,6 @@ public class ByteConverter
 		return ArrayUtils.addAll(result, new byte[padding]);
 	}
 
-	public static byte[] bitsetToBytes(BitSet b)
-	{
-		return null;
-	}
-
-	public BitSet bitsetFromBytes(byte[] b)
-	{
-		return null;
-	}
-
-    static public byte[] leafEntriesToBytes(List<LeafNodeEntry> entry_list) {
-        byte[] buffer = null;
-        for (LeafNodeEntry entry : entry_list) {
-            buffer = ArrayUtils.addAll(buffer, entry.FullEntry());
-        }
-        return buffer;
-    }
-
 	public static int LONG_LENGTH_IN_BYTES = 8;
 	public static int INT_LENGTH_IN_BYTES = 4;
 	public static int CHAR_LENGTH_IN_BYTES = 2;

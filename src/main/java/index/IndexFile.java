@@ -49,7 +49,7 @@ public class IndexFile {
     }
 
     private MoveUpElem insertInBTree(int key, TableEntryPtr table_entry_ptr, byte[] raw_node_page, long node_ptr) {
-        if(NodePage.GetPageType(raw_node_page) == LeafNodePage.TYPE) {
+        if(NodePage.getPageType(raw_node_page) == LeafNodePage.TYPE) {
             LeafNodePage leaf_node = new LeafNodePage(raw_node_page, node_ptr, false);
             if(leaf_node.isFull()) {
                 return splitLeafNode(leaf_node, key, table_entry_ptr);
@@ -84,7 +84,7 @@ public class IndexFile {
         while (true) {
             page_id = new PageId(_file_name, page_pointer);
             node_raw_page = _page_manager.getPage(page_id);
-            int page_type = NodePage.GetPageType(node_raw_page);
+            int page_type = NodePage.getPageType(node_raw_page);
             if (page_type == LeafNodePage.TYPE) {
                 break;
             }
@@ -150,7 +150,7 @@ public class IndexFile {
 //
 //    private InnerNodeInsertEntry InsertInBTree(int key, TableEntryPtr table_entry_pointer, PageId page_id) {
 //        byte[] node_raw_page = _page_manager.getPage(page_id);
-//        if (NodePage.GetPageType(node_raw_page) == LeafNodePage.TYPE) {
+//        if (NodePage.getPageType(node_raw_page) == LeafNodePage.TYPE) {
 //            LeafNodePage leaf_node = new LeafNodePage(node_raw_page, false);
 //            List<LeafNodeEntry> new_page_entries = leaf_node.insertNotFull(key, table_entry_pointer);
 //            if(new_page_entries != null) {
@@ -180,7 +180,7 @@ public class IndexFile {
 //    public void InsertEntry(int key, TableEntryPtr table_entry_pointer) {
 //        PageId root_page_id = new PageId(_file_name, _root_ptr);
 //        byte[] root_page = _page_manager.getPage(root_page_id);
-//        if(NodePage.GetPageType(root_page) == LeafNodePage.TYPE) {
+//        if(NodePage.getPageType(root_page) == LeafNodePage.TYPE) {
 //            LeafNodePage root_node = new LeafNodePage(root_page, false);
 //            if(root_node.isFull()) {
 //                MoveUpElem new_root_elem = SplitLeafNode(root_node, key, table_entry_pointer);

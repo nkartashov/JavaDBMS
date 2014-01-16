@@ -33,9 +33,9 @@ public class NodePage {
 
     static protected void initHeader(byte[] node_page_data, int valid_keys) {
         byte[] num_of_valid_keys = ByteConverter.intToByte(valid_keys);
-        BitSet valid_keys_bitset = new BitSet(KEYS_MAX_NUM);
-        valid_keys_bitset.set(0, valid_keys, true);
-        byte[] valid_keys_table = ByteConverter.bitsetToBytes(valid_keys_bitset);
+        BitArray valid_keys_bitarray = new BitArray(KEYS_MAX_NUM);
+        valid_keys_bitarray.set(0, valid_keys);
+        byte[] valid_keys_table = valid_keys_bitarray.toByteArray();
 
         System.arraycopy(num_of_valid_keys, 0, node_page_data, NUM_OF_VALID_KEYS_OFFSET, num_of_valid_keys.length);
         System.arraycopy(valid_keys_table, 0, node_page_data, VALID_KEYS_TABLE_OFFSET, valid_keys_table.length);
@@ -76,7 +76,7 @@ public class NodePage {
         System.arraycopy(num_of_valid_keys, 0, _node_page_data, NUM_OF_VALID_KEYS_OFFSET, num_of_valid_keys.length);
     }
 
-    static public int GetPageType(byte[] raw_node_page) {
+    static public int getPageType(byte[] raw_node_page) {
         return ByteConverter.intFromByte(raw_node_page, PAGE_TYPE_OFFSET);
     }
 
@@ -86,11 +86,6 @@ public class NodePage {
         System.arraycopy(_node_page_data, pointer_offset, buffer, 0, POINTER_SIZE + KEY_SIZE);
         return buffer;
     }
-
-//    protected void WriteEntriesList(List<LeafNodeEntry> list) {
-//        byte[] raw_all_entries = ByteConverter.leafEntriesToBytes(list);
-//        System.arraycopy(raw_all_entries, 0, _node_page_data, HEADER_SIZE, raw_all_entries.length);
-//    }
 
     protected boolean isFull() {
         return _valid_keys.cardinality() == KEYS_MAX_NUM;
@@ -139,14 +134,6 @@ public class NodePage {
             moveDataRight(key_pos);
         }
         return key_pos;
-    }
-
-    public void reInit(byte[] data, int keys_num) {
-        _num_of_valid_keys = keys_num;
-        _valid_keys.clear();
-        _valid_keys.set(0, keys_num);
-        System.arraycopy(data, 0, _node_page_data, HEADER_SIZE, data.length);
-        dumpChanges();
     }
 
     protected byte[] split() {
@@ -204,6 +191,20 @@ public class NodePage {
     static protected final int VALID_KEYS_TABLE_OFFSET = NUM_OF_VALID_KEYS_OFFSET + ByteConverter.INT_LENGTH_IN_BYTES;
     static protected final int VALID_KEYS_TABLE_SIZE = (int) Math.ceil(KEYS_MAX_NUM / 8.0);
 }
+
+
+//    public void reInit(byte[] data, int keys_num) {
+//        _num_of_valid_keys = keys_num;
+//        _valid_keys.clear();
+//        _valid_keys.set(0, keys_num);
+//        System.arraycopy(data, 0, _node_page_data, HEADER_SIZE, data.length);
+//        dumpChanges();
+//    }
+
+//    protected void WriteEntriesList(List<LeafNodeEntry> list) {
+//        byte[] raw_all_entries = ByteConverter.leafEntriesToBytes(list);
+//        System.arraycopy(raw_all_entries, 0, _node_page_data, HEADER_SIZE, raw_all_entries.length);
+//    }
 
 //    protected void SortEntries() {
 //        List<LeafNodeEntry> all_entries = GetEntriesList();
