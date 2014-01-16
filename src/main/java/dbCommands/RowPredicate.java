@@ -5,11 +5,11 @@ import java.util.List;
 /**
  * Created with IntelliJ IDEA.
  * User: nikita_kartashov
- * Date: 27/11/2013
- * Time: 15:19
+ * Date: 16/01/2014
+ * Time: 20:15
  * To change this template use File | Settings | File Templates.
  */
-public interface DbResultCommand
+public class RowPredicate
 {
-	public List<Object> getResult();
+	public boolean evaluate(List<Object> row) {return true;}
 }

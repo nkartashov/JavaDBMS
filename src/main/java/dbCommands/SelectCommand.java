@@ -1,26 +1,25 @@
 package dbCommands;
 
-
 import dbEnvironment.DbContext;
 import memoryManager.HeapFile;
 import tableTypes.Table;
 
 import java.util.List;
 
-
 /**
  * Created with IntelliJ IDEA.
  * User: nikita_kartashov
- * Date: 04/12/2013
- * Time: 14:34
+ * Date: 16/01/2014
+ * Time: 20:56
  * To change this template use File | Settings | File Templates.
  */
-public class SelectAllRowsCommand implements DbCommand, DbResultCommand
+public class SelectCommand implements DbCommand, DbResultCommand
 {
-
-	public SelectAllRowsCommand(String tableName)
+	public SelectCommand(String tableName, RowPredicate predicate, int count)
 	{
 		_tableName = tableName;
+		_predicate = predicate;
+		_count = count;
 	}
 
 	public void executeCommand(DbContext context)
@@ -31,7 +30,7 @@ public class SelectAllRowsCommand implements DbCommand, DbResultCommand
 		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
 			tableToSelectFrom.rowSignature());
 
-		_result = tableHeapFile.selectAllRows();
+		_result = tableHeapFile.selectWhere(_predicate, _count);
 	}
 
 	public List<Object> getResult()
@@ -43,6 +42,7 @@ public class SelectAllRowsCommand implements DbCommand, DbResultCommand
 
 	private boolean _hasBeenExecuted = false;
 	private String _tableName;
+	private RowPredicate _predicate = null;
+	private int _count = Integer.MAX_VALUE;
 	private List<Object> _result;
-
 }
