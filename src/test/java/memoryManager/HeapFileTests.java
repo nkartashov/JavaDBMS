@@ -305,5 +305,80 @@ public class HeapFileTests
 		context.close();
 	}
 
+	@Test
+	public void SimpleUpdateAllTest()
+	{
+		DbContext context = new DbContext(RESOURCE_PATH);
+
+		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
+		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
+		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
+
+		ArrayList <ColumnTuple> tuples = new ArrayList<ColumnTuple>();
+		tuples.add(columnTuple1);
+		tuples.add(columnTuple2);
+		tuples.add(columnTuple3);
+		String tableName = "testTabsdfgasdjfkahsdfflegfsgdfks";
+		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
+
+		createTableCommand.executeCommand(context);
+
+		ArrayList<String> args = new ArrayList<String>();
+		args.add("4");
+		args.add("gjghjf");
+		args.add("k");
+		TableRow tableRow = new TableRow(args);
+		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+
+		int numberOfRows = 300;
+
+		for (int i = 0; i < numberOfRows; ++i)
+		{
+			rows.add(tableRow);
+		}
+
+		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
+		insertRowsCommand.executeCommand(context);
+
+		ArrayList<String> newArgs = new ArrayList<String>();
+
+		newArgs.add("5");
+		newArgs.add("kekeke");
+		newArgs.add("k");
+
+		TableRow newRow = new TableRow(newArgs);
+
+		UpdateCommand updateCommand = new UpdateCommand(tableName, null, newRow);
+		updateCommand.executeCommand(context);
+
+		int expectedRowCount = 200;
+
+		SelectCommand selectRowsCommand = new SelectCommand(tableName, null, expectedRowCount);
+		selectRowsCommand.executeCommand(context);
+		List<Object> result = selectRowsCommand.getResult();
+
+		Assert.assertNotEquals(null, result);
+
+		Assert.assertEquals(expectedRowCount, result.size());
+
+		Table table = context.getTableByName(tableName);
+		ArrayList<BaseTableType> rowSignature = table.rowSignature();
+
+		ArrayList<Object> expected = new ArrayList<Object>();
+
+		for (int i = 0; i < args.size(); ++i)
+			expected.add(rowSignature.get(i).getAsObject(newArgs.get(i)));
+
+		for (int i = 0; i < expectedRowCount; ++i)
+		{
+			ArrayList<Object> actual = (ArrayList<Object>) result.get(i);
+			for (int j = 0; j < actual.size(); ++j)
+				Assert.assertEquals(expected.get(j), actual.get(j));
+		}
+
+		context.close();
+	}
+
+
 	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";
 }
