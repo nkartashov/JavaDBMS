@@ -15,7 +15,7 @@ public class BitArray
 		_lengthInBytes = bytes.length;
 		_size = bytes.length * ByteConverter.BITS_IN_BYTE;
 		for (int i = 0; i < _size; ++i)
-			if ((_bytes[byteIndex(i)] & leftShiftOne(bitIndex(i))) > 0)
+			if (isSet(i))
 				++_setBits;
 	}
 
@@ -109,6 +109,8 @@ public class BitArray
 	{
 		System.arraycopy(_bytes, 0, destination, destinationIndex, _lengthInBytes);
 	}
+
+	public int size() {return _size;}
 
 	public static BitArray readBitArray(byte[] source, int sourceIndex, int lengthBits)
 	{

@@ -29,6 +29,8 @@ public abstract class BaseTableType {
 
 	public abstract Object getAsObject(byte[] data, int offset, int size);
 
+	public abstract Object getAsObject(String s);
+
     private int _size;
 }
 

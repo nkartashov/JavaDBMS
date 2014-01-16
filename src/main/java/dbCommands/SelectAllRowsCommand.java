@@ -1,21 +1,24 @@
 package dbCommands;
 
+
 import dbEnvironment.DbContext;
 import memoryManager.HeapFile;
 import tableTypes.Table;
 
 import java.util.ArrayList;
 
+
 /**
  * Created with IntelliJ IDEA.
  * User: nikita_kartashov
- * Date: 27/11/2013
- * Time: 15:18
+ * Date: 04/12/2013
+ * Time: 14:34
  * To change this template use File | Settings | File Templates.
  */
-public class SelectOneRowCommand implements DbCommand, DbResultCommand
+public class SelectAllRowsCommand implements DbCommand, DbResultCommand
 {
-	public SelectOneRowCommand(String tableName)
+
+	public SelectAllRowsCommand(String tableName)
 	{
 		_tableName = tableName;
 	}
@@ -23,13 +26,12 @@ public class SelectOneRowCommand implements DbCommand, DbResultCommand
 	public void executeCommand(DbContext context)
 	{
 		_hasBeenExecuted = true;
-		Table tableToInsertInto = context.getTableByName(_tableName);
+		Table tableToSelectFrom = context.getTableByName(_tableName);
 
-		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToInsertInto.getRelativeDataPath(),
-			tableToInsertInto.rowSignature());
+		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
+			tableToSelectFrom.rowSignature());
 
-		_result = tableHeapFile.selectRow();
-
+		_result = tableHeapFile.selectAllRows();
 	}
 
 	public ArrayList<Object> getResult()
@@ -42,4 +44,5 @@ public class SelectOneRowCommand implements DbCommand, DbResultCommand
 	private boolean _hasBeenExecuted = false;
 	private String _tableName;
 	private ArrayList<Object> _result;
+
 }

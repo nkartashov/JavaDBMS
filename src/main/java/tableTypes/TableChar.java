@@ -8,14 +8,14 @@
 package tableTypes;
 
 import dbCommands.TableRow;
-import org.apache.commons.lang3.ArrayUtils;
 import utils.ByteConverter;
 
 public class TableChar extends BaseTableType {
 
     public TableChar(int size)
     {
-        this.setSize(size);
+        // In order to hold the \0 delimiter
+	    this.setSize(size + 1);
     }
 
     @Override public String toString()
@@ -30,12 +30,18 @@ public class TableChar extends BaseTableType {
 	public byte[] getAsByte(TableRow row, int columnPos)
 	{
 		String stringToConvert = row.getAsString(columnPos);
-		return ByteConverter.stringToBytes(stringToConvert, size() - stringToConvert.length() * ByteConverter.CHAR_LENGTH_IN_BYTES);
+		return ByteConverter.stringToBytes(stringToConvert, size());
 	}
 
 	@Override
 	public Object getAsObject(byte[] data, int offset, int size)
 	{
-		return ByteConverter.stringFromBytes(data, offset, size);
+		return ByteConverter.stringFromBytes(data, offset);
+	}
+
+	@Override
+	public Object getAsObject(String s)
+	{
+		return s;
 	}
 }

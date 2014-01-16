@@ -2,7 +2,6 @@ package memoryManager;
 
 import utils.Logger;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.util.LinkedHashMap;
@@ -140,8 +139,10 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
 
     private void dumpPage(final Map.Entry<PageId, ManagedMemoryPage> entry)
     {
-	    if (entry.getValue().references() != 0)
-		    Logger.LogApplicationError("Page Manager: the eldest entry is still accessed and there is no free memory left");
+	    if (entry.getValue().references() > 0)
+		    Logger.LogApplicationError("Page Manager: the entry being deleted is still accessed");
+	    if (entry.getValue().references() < 0)
+		    Logger.LogApplicationError("Page Manager: the entry being deleted has been released multiple times");
 	    if (entry.getValue().hasBeenChanged())
 	        dumpPage(entry.getKey(), entry.getValue().data());
     }
@@ -162,8 +163,7 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
         return false;
     }
 
-		// 64 * 1024 * 4K = 64 * 4M = 256M
-		private static final int MAX_PAGES = 10;//64 * 1024;
+	public static final int MAX_PAGES = 10;
 
     private static PageManager _instance = new PageManager();
 }
