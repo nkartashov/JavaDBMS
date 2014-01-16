@@ -1,10 +1,8 @@
 package memoryManager;
 
 import utils.BitArray;
-import utils.ByteIterator;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 
 import static java.lang.Math.min;
 
@@ -28,7 +26,7 @@ public class RowPage extends DiskPage
 
 		if (!blankPage)
 		{
-			_isOccupied = BitArray.readBitArray(_rawPage, BIT_MASK_OFFSET, BIT_MASK_SIZE_IN_BYTES);
+			_isOccupied = BitArray.readBitArray(_rawPage, BIT_MASK_OFFSET, BIT_MASK_SIZE_IN_BITS);
 		}
 	}
 
@@ -59,6 +57,28 @@ public class RowPage extends DiskPage
 	public boolean isEmpty()
 	{
 		return _isOccupied.cardinality() == 0;
+	}
+
+	public boolean isRowOccupied(int rowId)
+	{
+		return _isOccupied.isSet(rowId);
+	}
+
+	public ArrayList<Integer> occupiedRowsList()
+	{
+		ArrayList<Integer> result = new ArrayList<Integer>();
+
+		int i = -1;
+
+		while(true)
+		{
+			i = _isOccupied.nextSetBit(i + 1);
+			if (i == -1)
+				break;
+			result.add(i);
+		}
+
+		return result;
 	}
 
 	public int firstEmptyRowIndex()

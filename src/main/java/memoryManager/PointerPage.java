@@ -2,8 +2,6 @@ package memoryManager;
 
 import utils.ByteConverter;
 
-import java.util.ArrayList;
-
 /**
  * Created with IntelliJ IDEA.
  * User: nikita_kartashov
@@ -86,8 +84,18 @@ public class PointerPage extends DiskPage
 
 	public long pointersCount() {return _pointersCount;}
 
+	public long[] allPointers()
+	{
+		long[] result = new long[_pointersCount];
+		for (int i = 0; i < _pointersCount; ++i)
+			result[i] = getPointer(i);
+
+		return result;
+	}
+
 	public static void initHeader(byte[] rawData)
 	{
+		DiskPage.initHeader(rawData);
 		setPointersCount(rawData, 0);
 	}
 

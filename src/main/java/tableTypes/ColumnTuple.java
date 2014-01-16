@@ -6,7 +6,9 @@
  * To change this template use File | Settings | File Templates.
  */
 package tableTypes;
-public class ColumnTuple {
+
+public class ColumnTuple
+{
     public ColumnTuple(String name, int size, String type)
     {
         _name = name;

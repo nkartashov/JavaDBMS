@@ -23,7 +23,7 @@ public class TableInt extends BaseTableType {
     }
 
 	@Override
-	public byte[] getAsByte( TableRow row, int columnPos)
+	public byte[] getAsByte(TableRow row, int columnPos)
 	{
 		return ByteConverter.intToByte(row.getAsInt(columnPos));
 	}
@@ -32,5 +32,11 @@ public class TableInt extends BaseTableType {
 	public Object getAsObject(byte[] data, int offset, int size)
 	{
 		return ByteConverter.intFromByte(data, offset);
+	}
+
+	@Override
+	public Object getAsObject(String s)
+	{
+		return Integer.parseInt(s);
 	}
 }

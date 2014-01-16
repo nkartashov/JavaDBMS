@@ -4,8 +4,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
-
 /**
  * Created with IntelliJ IDEA.
  * User: nikita_kartashov
@@ -43,8 +41,29 @@ public class RowPageTest
 		Assert.assertArrayEquals(dataPayload, page.getRow(0));
 		Assert.assertArrayEquals(newPayload, page.getRow(1));
 
+		Assert.assertEquals(1 + test, page.occupiedRowsList().size());
+
 		page.deleteRow(0);
 
 		Assert.assertEquals(test, page.getRowsCount());
+	}
+
+	@Test
+	public void OccupiedRowsListTest()
+	{
+		byte[] rawData = new byte[DiskPage.MAX_PAGE_SIZE];
+
+		byte[] dataPayload = {45, -127, -117, 32, 87, -11, 0, 1, 67, 89};
+
+		RowPage page = new RowPage(rawData, true, dataPayload.length);
+
+		page.putRow(dataPayload);
+		page.putRow(dataPayload);
+		page.putRow(dataPayload);
+
+		Integer[] expectedValues = {0, 1, 2};
+
+		Assert.assertEquals(expectedValues.length, page.occupiedRowsList().size());
+		Assert.assertArrayEquals(expectedValues, page.occupiedRowsList().toArray());
 	}
 }

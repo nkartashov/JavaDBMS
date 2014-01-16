@@ -19,6 +19,6 @@ public class ByteConverterTests
 		String testString = "jfkfldkf";
 		Assert.assertEquals(tableTypeSize,
 			ByteConverter.stringToBytes(testString,
-				tableTypeSize - testString.length() * ByteConverter.CHAR_LENGTH_IN_BYTES).length);
+				tableTypeSize).length);
 	}
 }

@@ -2,7 +2,6 @@ package dbCommands;
 
 import org.apache.commons.lang3.ArrayUtils;
 import tableTypes.BaseTableType;
-import tableTypes.TableInt;
 
 import java.util.ArrayList;
 
@@ -34,7 +33,7 @@ public class TableRow
 	{
 		byte[] result = rowSignature.get(0).getAsByte(this, 0);
 
-		for (int i = 1; i < _arguments.size(); ++i)
+		for (int i = 1; i < rowSignature.size(); ++i)
 		{
 			result = ArrayUtils.addAll(result, rowSignature.get(i).getAsByte(this, i));
 		}

@@ -77,4 +77,27 @@ public class BitArrayTests
 		Assert.assertEquals(false, bitArray.get(index));
 		Assert.assertEquals(1, bitArray.cardinality());
 	}
+
+	@Test
+	public void ReadFromMemoryTest()
+	{
+		BitArray test = new BitArray(47);
+
+		int[] testBits = {0, 2, 7, 9, 10, 15, 27, 32, 44, 46};
+
+		for (int i: testBits)
+			test.set(i);
+
+
+		byte[] byteRepr = test.toByteArray();
+
+		BitArray bitArray = new BitArray(byteRepr);
+
+		Assert.assertEquals(testBits.length, bitArray.cardinality());
+
+		for (int i = 0; i < test.size(); ++i)
+			Assert.assertEquals(test.get(i), bitArray.get(i));
+
+	}
+
 }

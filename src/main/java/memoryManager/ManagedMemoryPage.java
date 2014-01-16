@@ -21,7 +21,7 @@ public class ManagedMemoryPage
 	public void setData(byte[] data)
 	{
 		_hasBeenChanged = true;
-		_rawData = data;
+		System.arraycopy(data, 0, _rawData, 0, DiskPage.MAX_PAGE_SIZE);
 	}
 	public int references() {return _references;}
 

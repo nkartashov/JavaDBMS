@@ -24,9 +24,9 @@ public class ByteConverter
 		return ByteBuffer.wrap(rawData, index, INT_LENGTH_IN_BYTES).getInt();
 	}
 
-	public static String stringFromBytes(byte[] rawData, int index, int length)
+	public static String stringFromBytes(byte[] rawData, int index)
 	{
-		return new String(rawData, index, length);
+		return new String(rawData, index + 1, rawData[index]);
 	}
 
 	public static byte[] longToByte(long item)
@@ -39,18 +39,14 @@ public class ByteConverter
 		return ByteBuffer.allocate(INT_LENGTH_IN_BYTES).putInt(item).array();
 	}
 
-	public static byte[] stringToBytes(String item, int padding)
+	public static byte[] stringToBytes(String item, int length)
 	{
-		ByteBuffer buffer = ByteBuffer.allocate(CHAR_LENGTH_IN_BYTES);
-		byte[] result = new byte[0];
-		for (char ch: item.toCharArray())
-		{
-			buffer.clear();
-			buffer.putChar(0, ch);
-			result = ArrayUtils.addAll(result, buffer.array());
-		}
-
-		return ArrayUtils.addAll(result, new byte[padding]);
+		byte[] result = new byte[1];
+		byte[] bytes = item.getBytes();
+		result[0] = (byte) bytes.length;
+		assert bytes.length <= Byte.MAX_VALUE;
+		return ArrayUtils.addAll(ArrayUtils.addAll(result, bytes),
+			new byte[length - item.length() -1]);
 	}
 
 	public static byte[] bitsetToBytes(BitSet b)
@@ -65,7 +61,7 @@ public class ByteConverter
 
 	public static int LONG_LENGTH_IN_BYTES = 8;
 	public static int INT_LENGTH_IN_BYTES = 4;
-	public static int CHAR_LENGTH_IN_BYTES = 2;
+	public static int CHAR_LENGTH_IN_BYTES = 1;
 
 	public static int BITS_IN_BYTE = 8;
 }
