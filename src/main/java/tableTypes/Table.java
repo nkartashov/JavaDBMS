@@ -1,8 +1,13 @@
 package tableTypes;
+
 import utils.Logger;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,6 +108,8 @@ public class Table {
 
 	public ArrayList<BaseTableType> rowSignature() {return _rowSignature;}
 
+	public List<Column> columns() {return _columns;}
+
     private StringBuilder SerializeMetadata(StringBuilder result)
     {
         result.append("<meta>");
@@ -157,7 +164,7 @@ public class Table {
     }
 
 	private ArrayList<BaseTableType> _rowSignature = new ArrayList<BaseTableType>();
-    private ArrayList<Column> _columns = new ArrayList<Column>();
+    private List<Column> _columns = new ArrayList<Column>();
 	private int _rowSize = 0;
     private String _name;
     private UUID _uid;
