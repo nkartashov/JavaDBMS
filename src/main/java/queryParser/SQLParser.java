@@ -7,6 +7,7 @@ import java.util.List;
 import dbCommands.*;
 import dbEnvironment.DbContext;
 import org.apache.commons.lang3.ArrayUtils;
+import tableTypes.Column;
 import tableTypes.ColumnTuple;
 
 public class SQLParser {
@@ -90,23 +91,17 @@ public class SQLParser {
     }
 
     private DbCommand parseSelect() {
-        if (_query.toUpperCase().indexOf("JOIN") != -1) {
-            //SelectWithJoinCommand
-            return null;
+        // !!! assuming that only SELECT * can be used !!!
+        String table_name = _query.split(" ", 5)[TABLE_NAME_POSITION].trim();
+        RowPredicate predicate = null;
+        int index_of_where = _query.toUpperCase().indexOf("WHERE");
+        if (index_of_where != -1) {
+            predicate = parseWhere(table_name, _query.substring(index_of_where + WHERE_WORD_LENGTH));
         }
-        else if (_query.toUpperCase().indexOf("WHERE") != -1) {
-             return null;
+        if(predicate != null) {
+            return new SelectCommand(table_name, predicate, -1);
         }
-        else {
-            String first_col_name = _query.split(" ", 2)[1];
-            if (first_col_name.equals("*")) {
-                String table_name = _query.split(" ", 4)[3].trim();
-                //DbCommand select_all = new SelectAllCommand(table_name);
-                //return select_all;
-                return null;
-            }
-            return null;
-        }
+        return new SelectAllRowsCommand(table_name);
     }
 
     private RowPredicate parseWhere(String table_name, String queue) {
@@ -115,10 +110,10 @@ public class SQLParser {
         if(_error_occured) {
             return null;
         }
-        int[] column_numbers = null;
         for(int i = 0; i < conditions.size(); ++i) {
-            column_numbers = ArrayUtils.addAll(column_numbers, findColumnNumbers(table_name, conditions.get(i)));
+            namesToColumnNumbers(table_name, conditions.get(i));
         }
+        return new RowPredicate(conditions);
     }
 
     private void parseCondition(String query, List<SingleCondition> conditions) {
@@ -153,13 +148,27 @@ public class SQLParser {
         return operator;
     }
 
-    private int[] findColumnNumbers(String table_name, SingleCondition condition) {
-        _context.getTableByName(table_name);
-        return null;
+    private void namesToColumnNumbers(String table_name, SingleCondition condition) {
+        List<Column> columns = _context.getTableByName(table_name).columns();
+        for (int i = 0; i < columns.size(); ++i) {
+            if (columns.get(i).name().compareTo(condition._val1) == 0) {
+                condition._val1 = "{" + Integer.toString(i) + "}";
+                break;
+            }
+        }
+        for (int i = 0; i < columns.size(); ++i) {
+            if (columns.get(i).name().compareTo(condition._val2) == 0) {
+                condition._val2 = "{" + Integer.toString(i) + "}";
+                break;
+            }
+        }
     }
 
     private String _query;
     private DbContext _context;
     private boolean _error_occured = false;
+
+    final private int WHERE_WORD_LENGTH = 5;
+    final private int TABLE_NAME_POSITION = 3;
 }
 

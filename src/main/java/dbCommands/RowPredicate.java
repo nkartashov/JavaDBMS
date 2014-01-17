@@ -1,5 +1,7 @@
 package dbCommands;
 
+import queryParser.SingleCondition;
+
 import java.util.List;
 
 /**
@@ -11,5 +13,11 @@ import java.util.List;
  */
 public class RowPredicate
 {
+    public RowPredicate(List<SingleCondition> conditions) {
+        _conditions = conditions;
+    }
+
 	public boolean evaluate(List<Object> row) {return true;}
+
+    private List<SingleCondition> _conditions;
 }

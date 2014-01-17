@@ -60,6 +60,7 @@ public class Column {
     }
 
 	public BaseTableType type() {return _type;}
+    public String name() { return _name; }
 
     private String _name;
     private BaseTableType _type;
