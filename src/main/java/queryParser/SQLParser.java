@@ -2,16 +2,20 @@ package queryParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import dbCommands.CreateTableCommand;
-import dbCommands.DbCommand;
-import dbCommands.InsertRowsCommand;
-import dbCommands.TableRow;
+import dbCommands.*;
+import dbEnvironment.DbContext;
+import org.apache.commons.lang3.ArrayUtils;
 import tableTypes.ColumnTuple;
 
 public class SQLParser {
 
-    public SQLParser (String queryString) { _query = queryString.trim().replaceAll(" +", " ").replaceAll(" +,", ",").replace(";", ""); }
+    public SQLParser (String queryString, DbContext context) {
+        _query = queryString.trim().replaceAll(" +", " ").replaceAll(" +,", ",").replace(";", "");
+        _context = context;
+    }
+
     public DbCommand parse () {
         String firstWord = _query.split(" ", 2)[0].toUpperCase();
         if (firstWord.equals("CREATE")) {
@@ -84,6 +88,7 @@ public class SQLParser {
         //return iic;
         return null;
     }
+
     private DbCommand parseSelect() {
         if (_query.toUpperCase().indexOf("JOIN") != -1) {
             //SelectWithJoinCommand
@@ -104,6 +109,57 @@ public class SQLParser {
         }
     }
 
+    private RowPredicate parseWhere(String table_name, String queue) {
+        List<SingleCondition> conditions = new ArrayList<SingleCondition>();
+        parseCondition(queue, conditions);
+        if(_error_occured) {
+            return null;
+        }
+        int[] column_numbers = null;
+        for(int i = 0; i < conditions.size(); ++i) {
+            column_numbers = ArrayUtils.addAll(column_numbers, findColumnNumbers(table_name, conditions.get(i)));
+        }
+    }
+
+    private void parseCondition(String query, List<SingleCondition> conditions) {
+        String[] cond_array = query.split("and", 2);
+        String operator = findCompOperator(cond_array[0]);
+        if(operator == null) {
+            _error_occured = true;
+            return;
+        }
+        String[] exprs = cond_array[0].split(operator);
+        conditions.add(new SingleCondition(exprs[0].trim(), operator, exprs[1].trim()));
+        if(cond_array.length == 1) {
+            return;
+        }
+        parseCondition(cond_array[1], conditions);
+    }
+
+    private String findCompOperator(String query) {
+        String operator;
+        if (query.indexOf(">") != -1) {
+            operator = ">";
+        }
+        else if (query.indexOf("<") != -1) {
+            operator = "<";
+        }
+        else if (query.indexOf("=") != -1) {
+            operator = "=";
+        }
+        else return null;
+        int index = query.indexOf(operator);
+        operator.concat(query.substring(index, index + 1));
+        return operator;
+    }
+
+    private int[] findColumnNumbers(String table_name, SingleCondition condition) {
+        _context.getTableByName(table_name);
+        return null;
+    }
+
     private String _query;
+    private DbContext _context;
+    private boolean _error_occured = false;
 }
 
