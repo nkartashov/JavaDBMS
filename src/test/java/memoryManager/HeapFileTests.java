@@ -4,7 +4,7 @@ import dbCommands.*;
 import dbEnvironment.DbContext;
 import org.junit.Assert;
 import org.junit.Test;
-import tableTypes.BaseTableType;
+import tableTypes.Column;
 import tableTypes.ColumnTuple;
 import tableTypes.Table;
 
@@ -204,12 +204,12 @@ public class HeapFileTests
 		Assert.assertEquals(numberOfRows, result.size());
 
 		Table table = context.getTableByName(tableName);
-		ArrayList<BaseTableType> rowSignature = table.rowSignature();
+		List<Column> rowSignature = table.rowSignature();
 
 		ArrayList<Object> expected = new ArrayList<Object>();
 
 		for (int i = 0; i < args.size(); ++i)
-			expected.add(rowSignature.get(i).getAsObject(args.get(i)));
+			expected.add(rowSignature.get(i).type().getAsObject(args.get(i)));
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{
@@ -264,12 +264,12 @@ public class HeapFileTests
 		Assert.assertEquals(numberOfRows, result.size());
 
 		Table table = context.getTableByName(tableName);
-		ArrayList<BaseTableType> rowSignature = table.rowSignature();
+		List<Column> rowSignature = table.rowSignature();
 
 		ArrayList<Object> expected = new ArrayList<Object>();
 
 		for (int i = 0; i < args.size(); ++i)
-			expected.add(rowSignature.get(i).getAsObject(args.get(i)));
+			expected.add(rowSignature.get(i).type().getAsObject(args.get(i)));
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{
@@ -385,16 +385,16 @@ public class HeapFileTests
 		Assert.assertEquals(expectedRowCount, result.size());
 
 		Table table = context.getTableByName(tableName);
-		ArrayList<BaseTableType> rowSignature = table.rowSignature();
+		List<Column> rowSignature = table.rowSignature();
 
-		ArrayList<Object> expected = new ArrayList<Object>();
+		List<Object> expected = new ArrayList<Object>();
 
 		for (int i = 0; i < args.size(); ++i)
-			expected.add(rowSignature.get(i).getAsObject(newArgs.get(i)));
+			expected.add(rowSignature.get(i).type().getAsObject(newArgs.get(i)));
 
 		for (int i = 0; i < expectedRowCount; ++i)
 		{
-			ArrayList<Object> actual = (ArrayList<Object>) result.get(i);
+			List<Object> actual = (ArrayList<Object>) result.get(i);
 			for (int j = 0; j < actual.size(); ++j)
 				Assert.assertEquals(expected.get(j), actual.get(j));
 		}

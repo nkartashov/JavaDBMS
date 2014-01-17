@@ -17,7 +17,6 @@ import java.util.List;
  */
 public class SelectAllRowsCommand implements DbCommand, DbResultCommand
 {
-
 	public SelectAllRowsCommand(String tableName)
 	{
 		_tableName = tableName;

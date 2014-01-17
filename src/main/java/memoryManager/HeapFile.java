@@ -2,7 +2,7 @@ package memoryManager;
 
 import dbCommands.RowPredicate;
 import dbCommands.TableRow;
-import tableTypes.BaseTableType;
+import tableTypes.Column;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +19,13 @@ public class HeapFile
 	// Not full = green
 	// Full = red
 
-	public HeapFile(String filePath, ArrayList<BaseTableType> rowSignature)
+	public HeapFile(String filePath, List<Column> rowSignature)
 	{
 		_filePath = filePath;
 		_rowSignature = rowSignature;
 		_rowSize = 0;
-		for (BaseTableType type: _rowSignature)
-			_rowSize += type.size();
+		for (Column column: _rowSignature)
+			_rowSize += column.size();
 	}
 
 	public static void seedDataFile(String filePath)
@@ -355,10 +355,10 @@ public class HeapFile
 		byte[] rowData = page.getRow(rowNumber);
 		int byteOffset = 0;
 		result = new ArrayList<Object>();
-		for (BaseTableType type : _rowSignature)
+		for (Column column : _rowSignature)
 		{
-			result.add(type.getAsObject(rowData, byteOffset, type.size()));
-			byteOffset += type.size();
+			result.add(column.type().getAsObject(rowData, byteOffset, column.size()));
+			byteOffset += column.size();
 		}
 
 		return result;
@@ -506,7 +506,7 @@ public class HeapFile
 	private PageId blankLocalPageId() {return localPageId(0);}
 
 	private String _filePath;
-	private ArrayList<BaseTableType> _rowSignature;
+	private List<Column> _rowSignature;
 	private int _rowSize;
 	private static PageManager _pageManager = PageManager.getInstance();
 

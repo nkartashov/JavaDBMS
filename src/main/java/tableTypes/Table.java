@@ -34,7 +34,6 @@ public class Table {
 	        columnToAdd = new Column(tuple);
             _columns.add(columnToAdd);
 	        _rowSize += columnToAdd.size();
-	        _rowSignature.add(columnToAdd.type());
         }
         _uid = uid;
 
@@ -106,9 +105,7 @@ public class Table {
 
 	public int rowSize() {return _rowSize;}
 
-	public ArrayList<BaseTableType> rowSignature() {return _rowSignature;}
-
-	public List<Column> columns() {return _columns;}
+	public List<Column> rowSignature() {return _columns;}
 
     private StringBuilder SerializeMetadata(StringBuilder result)
     {
@@ -146,7 +143,6 @@ public class Table {
             Column deserializedColumn = new Column();
             deserializedColumn.DeserializeColumn(columnMatcher.group(1));
             _columns.add(deserializedColumn);
-	        _rowSignature.add(deserializedColumn.type());
         }
     }
 
@@ -163,7 +159,6 @@ public class Table {
         _name = numberMatcher.group(1);
     }
 
-	private ArrayList<BaseTableType> _rowSignature = new ArrayList<BaseTableType>();
     private List<Column> _columns = new ArrayList<Column>();
 	private int _rowSize = 0;
     private String _name;
