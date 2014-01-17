@@ -63,7 +63,26 @@ public class RowPageTest
 
 		Integer[] expectedValues = {0, 1, 2};
 
-		Assert.assertEquals(expectedValues.length, page.occupiedRowsList().size());
 		Assert.assertArrayEquals(expectedValues, page.occupiedRowsList().toArray());
+	}
+
+	@Test
+	public void DeleteRowTest()
+	{
+		byte[] rawData = new byte[DiskPage.MAX_PAGE_SIZE];
+
+		byte[] dataPayload = {45, -127, -117, 32, 87, -11, 0, 1, 67, 89};
+
+		RowPage page = new RowPage(rawData, true, dataPayload.length);
+
+		page.putRow(dataPayload);
+		page.putRow(dataPayload);
+		page.putRow(dataPayload);
+
+		Integer[] expectedValues = {0, 2};
+
+		page.deleteRow(1);
+
+		Assert.assertEquals(expectedValues, page.occupiedRowsList().toArray());
 	}
 }

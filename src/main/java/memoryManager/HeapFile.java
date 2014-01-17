@@ -42,10 +42,114 @@ public class HeapFile
 		_pageManager.updateAndReleasePage(firstRedPageId, redPointerPage);
 	}
 
+	public void deleteRows(RowPredicate predicate)
+	{
+		PageId greenPointerPageId = localPageId(FIRST_GREEN_POINTER_PAGE_INDEX);
+		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+		_pageManager.releasePage(greenPointerPageId);
+
+		while (greenPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
+		{
+			if (!greenPointerPage.isEmpty())
+				deleteAllPointers(greenPointerPage.allPointers(), predicate, false);
+
+			greenPointerPageId = localPageId(greenPointerPage.nextPageIndex());
+			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+			_pageManager.releasePage(greenPointerPageId);
+		}
+
+		if (!greenPointerPage.isEmpty())
+			deleteAllPointers(greenPointerPage.allPointers(), predicate, false);
+
+		PageId redPointerPageId = localPageId(FIRST_RED_POINTER_PAGE_INDEX);
+		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
+		_pageManager.releasePage(redPointerPageId);
+
+		while (redPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
+		{
+			if (!redPointerPage.isEmpty())
+			{
+				List<Long> pointersToMove = deleteAllPointers(redPointerPage.allPointers(), predicate, true);
+				for (Long pointer: pointersToMove)
+				{
+					removePointer(redPointerPageId.getPageNumber(), pointer);
+					addGreenPointer(pointer);
+				}
+			}
+
+			redPointerPageId = localPageId(redPointerPage.nextPageIndex());
+			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
+			_pageManager.releasePage(redPointerPageId);
+		}
+
+		if (!redPointerPage.isEmpty())
+		{
+			List<Long> pointersToMove = deleteAllPointers(redPointerPage.allPointers(), predicate, true);
+			for (Long pointer: pointersToMove)
+			{
+				removePointer(redPointerPageId.getPageNumber(), pointer);
+				addGreenPointer(pointer);
+			}
+		}
+	}
+
+	private List<Long> deleteAllPointers(long[] allPointers, RowPredicate predicate, boolean redPage)
+	{
+		List<Long> result = new ArrayList<Long>();
+		for (long pageNumber: allPointers)
+		{
+			boolean deletionsHappened = deleteAllRowsFromPage(pageNumber, predicate);
+			if (redPage && deletionsHappened)
+				result.add(pageNumber);
+		}
+		return result;
+	}
+
+	private boolean deleteAllRowsFromPage(long pageNumber, RowPredicate predicate)
+	{
+		boolean deletionsHappened = false;
+		PageId pageId = localPageId(pageNumber);
+		RowPage page = new RowPage(_pageManager.getPage(pageId), false, _rowSize);
+		try
+		{
+			ArrayList<Integer> rowList = null;
+			if (!page.isEmpty())
+				rowList = page.occupiedRowsList();
+			if (rowList == null)
+				return deletionsHappened;
+			for (Integer rowNumber: rowList)
+			{
+				List<Object> rowAsObject = selectRowFromPage(pageNumber, rowNumber);
+				if (predicate != null)
+				{
+					if (predicate.evaluate(rowAsObject))
+					{
+						page.deleteRow(rowNumber);
+						deletionsHappened = true;
+					}
+				}
+				else
+				{
+					page.deleteRow(rowNumber);
+					deletionsHappened = true;
+				}
+			}
+		}
+		finally
+		{
+			_pageManager.updateAndReleasePage(pageId, page.rawPage());
+		}
+		return deletionsHappened;
+	}
+
 	public void insertRow(TableRow row)
 	{
-		PageId greenPageId = localPageId(getGreenPageIndex());
+		PageId notEmptyGreenPointerPageId = localPageId(getNotEmptyGreenPointerPageIndex());
+		PointerPage notEmptyGreenPointerPage = new PointerPage(_pageManager.getPage(notEmptyGreenPointerPageId), false);
+
+		PageId greenPageId = localPageId(notEmptyGreenPointerPage.firstGreenPageIndex());
 		RowPage greenPage = new RowPage(_pageManager.getPage(greenPageId), false, _rowSize);
+		boolean pointerPageHasBecomeFull = false;
 		try
 		{
 			byte[] byteRow = row.getAsByteArray(_rowSignature);
@@ -53,13 +157,18 @@ public class HeapFile
 
 			if (greenPage.isFull())
 			{
+				pointerPageHasBecomeFull = true;
 				addRedPointer(greenPageId.getPageNumber());
-				removeGreenPointerFromLastPage(greenPageId.getPageNumber());
+				notEmptyGreenPointerPage.removePointer(greenPageId.getPageNumber());
 			}
 		}
 		finally
 		{
 			_pageManager.updateAndReleasePage(greenPageId, greenPage.rawPage());
+			if (pointerPageHasBecomeFull)
+				_pageManager.updateAndReleasePage(notEmptyGreenPointerPageId, notEmptyGreenPointerPage.rawPage());
+			else
+				_pageManager.releasePage(notEmptyGreenPointerPageId);
 		}
 	}
 
@@ -78,7 +187,6 @@ public class HeapFile
 			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
 			_pageManager.releasePage(redPointerPageId);
 		}
-
 
 		if (!redPointerPage.isEmpty())
 			updateAllPointers(redPointerPage.allPointers(), predicate, row);
@@ -135,12 +243,9 @@ public class HeapFile
 		}
 		finally
 		{
-			_pageManager.releasePage(pageId);
+			_pageManager.updateAndReleasePage(pageId, page.rawPage());
 		}
 	}
-
-
-
 
 	public List<Object> selectAllRows()
 	{
@@ -166,7 +271,6 @@ public class HeapFile
 			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
 			_pageManager.releasePage(redPointerPageId);
 		}
-
 
 		if (!redPointerPage.isEmpty())
 			result.addAll(selectFromAllPointers(redPointerPage.allPointers(), predicate));
@@ -205,7 +309,11 @@ public class HeapFile
 		ArrayList<Object> result = new ArrayList<Object>();
 
 		for (long pageNumber: allPointers)
-			result.addAll(selectAllRowsFromPage(pageNumber, predicate));
+		{
+			List<Object> intermediateResult = selectAllRowsFromPage(pageNumber, predicate);
+			if (intermediateResult != null)
+				result.addAll(intermediateResult);
+		}
 
 		return result;
 	}
@@ -253,52 +361,21 @@ public class HeapFile
 			byteOffset += type.size();
 		}
 
-
 		return result;
 	}
 
-	private long getLastRedPointerPageIndex()
+	private long getNotFullRedPointerPageIndex()
 	{
-		long result;
-		PageId redPointerPageId = localPageId(FIRST_RED_POINTER_PAGE_INDEX);
-		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
-		_pageManager.releasePage(redPointerPageId);
-
-		while (redPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
-		{
-
-			redPointerPageId = localPageId(redPointerPage.nextPageIndex());
-			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
-			_pageManager.releasePage(redPointerPageId);
-		}
-		result = redPointerPageId.getPageNumber();
-
-		return result;
+		return getNotFullPointerPageIndexStarting(FIRST_RED_POINTER_PAGE_INDEX);
 	}
 
 	private void addRedPointer(long pointer)
 	{
-		long lastRedPointerPageIndex = getLastRedPointerPageIndex();
-		PageId redPointerPageId = localPageId(lastRedPointerPageIndex);
+		PageId redPointerPageId = localPageId(getNotFullRedPointerPageIndex());
 		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
 		try
 		{
-			if (!redPointerPage.isFull())
-				redPointerPage.addPointer(pointer);
-			else
-			{
-				PageId newRedPointerPageId = blankLocalPageId();
-				PointerPage newRedPointerPage = new PointerPage(_pageManager.createPage(newRedPointerPageId), true);
-				try
-				{
-					newRedPointerPage.addPointer(pointer);
-					redPointerPage.setNextPageIndex(newRedPointerPageId.getPageNumber());
-				}
-				finally
-				{
-					_pageManager.updateAndReleasePage(newRedPointerPageId, newRedPointerPage.rawPage());
-				}
-			}
+			redPointerPage.addPointer(pointer);
 		}
 		finally
 		{
@@ -306,86 +383,122 @@ public class HeapFile
 		}
 	}
 
-	private void removeGreenPointerFromLastPage(long pointer)
+	private long getNotFullGreenPointerPageIndex()
 	{
-		long lastGreenPointerPageIndex = getLastGreenPointerPageIndex();
-		PageId greenPointerPageId = localPageId(lastGreenPointerPageIndex);
-		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
-		try
-		{
-			greenPointerPage.removePointer(pointer);
-		}
-		finally
-		{
-			_pageManager.updateAndReleasePage(greenPointerPageId, greenPointerPage.rawPage());
-		}
-	}
-
-	private long getGreenPageIndex()
-	{
-		long lastGreenPointerPage = getLastGreenPointerPageIndex();
-
-		PageId greenPointerPageId = localPageId(lastGreenPointerPage);
-		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
-		_pageManager.releasePage(greenPointerPageId);
-		long greenPageIndex = greenPointerPage.getLastPointer();
-		if (greenPageIndex != -1)
-			return greenPageIndex;
-		PageId greenPageId = blankLocalPageId();
-		byte[] newPage = _pageManager.createPage(greenPageId);
-		RowPage.initHeader(newPage);
-		_pageManager.updateAndReleasePage(greenPageId, newPage);
-		addGreenPointer(greenPageId.getPageNumber());
-		return greenPageId.getPageNumber();
-	}
-
-	private long getLastGreenPointerPageIndex()
-	{
-		long result = -1;
-		PageId greenPointerPageId = localPageId(FIRST_GREEN_POINTER_PAGE_INDEX);
-		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
-		_pageManager.releasePage(greenPointerPageId);
-		while (greenPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
-		{
-
-			greenPointerPageId = localPageId(greenPointerPage.nextPageIndex());
-			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
-			_pageManager.releasePage(greenPointerPageId);
-		}
-		result = greenPointerPageId.getPageNumber();
-
-
-		return result;
+		return getNotFullPointerPageIndexStarting(FIRST_GREEN_POINTER_PAGE_INDEX);
 	}
 
 	private void addGreenPointer(long pointer)
 	{
-		long lastGreenPointerPage = getLastGreenPointerPageIndex();
-		PageId greenPointerPageId = localPageId(lastGreenPointerPage);
+		PageId greenPointerPageId = localPageId(getNotFullGreenPointerPageIndex());
 		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
 		try
 		{
-			if (!greenPointerPage.isFull())
-				greenPointerPage.addPointer(pointer);
-			else
-			{
-				PageId newGreenPointerPageId = blankLocalPageId();
-				PointerPage newGreenPointerPage = new PointerPage(_pageManager.createPage(newGreenPointerPageId), true);
-				try
-				{
-					newGreenPointerPage.addPointer(pointer);
-					greenPointerPage.setNextPageIndex(newGreenPointerPageId.getPageNumber());
-					newGreenPointerPage.setPrevPageIndex(greenPointerPageId.getPageNumber());
-				}
-				finally
-				{
-					_pageManager.updateAndReleasePage(newGreenPointerPageId, newGreenPointerPage.rawPage());
-				}
-			}
+			greenPointerPage.addPointer(pointer);
 		}
 		finally
 		{
 			_pageManager.updateAndReleasePage(greenPointerPageId, greenPointerPage.rawPage());
+		}
+	}
+
+	private long getNotEmptyGreenPointerPageIndex()
+	{
+		PageId greenPointerPageId = localPageId(FIRST_GREEN_POINTER_PAGE_INDEX);
+		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+		_pageManager.releasePage(greenPointerPageId);
+
+		if (!greenPointerPage.isEmpty())
+			return greenPointerPageId.getPageNumber();
+
+		while (greenPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
+		{
+			greenPointerPageId = localPageId(greenPointerPage.nextPageIndex());
+			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+			_pageManager.releasePage(greenPointerPageId);
+
+			if (!greenPointerPage.isEmpty())
+				return greenPointerPageId.getPageNumber();
+		}
+
+		PageId greenPageId = blankLocalPageId();
+		byte[] newPage = _pageManager.createPage(greenPageId);
+		RowPage.initHeader(newPage);
+		_pageManager.updateAndReleasePage(greenPageId, newPage);
+
+		addPointer(greenPointerPageId.getPageNumber(), greenPageId.getPageNumber());
+
+		return greenPointerPageId.getPageNumber();
+	}
+
+	private long getNotFullPointerPageIndexStarting(long starting)
+	{
+		PageId pointerPageId = localPageId(starting);
+		PointerPage pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), false);
+		_pageManager.releasePage(pointerPageId);
+
+		if (!pointerPage.isFull())
+			return pointerPageId.getPageNumber();
+
+		while (pointerPage.nextPageIndex() != DiskPage.NULL_PTR)
+		{
+			pointerPageId = localPageId(pointerPage.nextPageIndex());
+			pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), false);
+			_pageManager.releasePage(pointerPageId);
+
+			if (!pointerPage.isFull())
+				return pointerPageId.getPageNumber();
+		}
+
+		return addNewPointerPage(pointerPageId.getPageNumber());
+	}
+
+	private long addNewPointerPage(long lastPointerPageIndex)
+	{
+		PageId lastPointerPageId = localPageId(lastPointerPageIndex);
+		PointerPage lastPointerPage = new PointerPage(_pageManager.getPage(lastPointerPageId), false);
+
+		PageId newPointerPageId = blankLocalPageId();
+		PointerPage newPointerPage = new PointerPage(_pageManager.createPage(newPointerPageId), true);
+		try
+		{
+			lastPointerPage.setNextPageIndex(newPointerPageId.getPageNumber());
+			newPointerPage.setPrevPageIndex(lastPointerPageId.getPageNumber());
+		}
+		finally
+		{
+			_pageManager.updateAndReleasePage(newPointerPageId, newPointerPage.rawPage());
+			_pageManager.updateAndReleasePage(lastPointerPageId, lastPointerPage.rawPage());
+		}
+
+		return newPointerPageId.getPageNumber();
+	}
+
+	private void addPointer(long pointerPageIndex, long pointer)
+	{
+		PageId pointerPageId = localPageId(pointerPageIndex);
+		PointerPage pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), false);
+		try
+		{
+			pointerPage.addPointer(pointer);
+		}
+		finally
+		{
+			_pageManager.updateAndReleasePage(pointerPageId, pointerPage.rawPage());
+		}
+	}
+
+	private void removePointer(long pointerPageIndex, long pointer)
+	{
+		PageId pointerPageId = localPageId(pointerPageIndex);
+		PointerPage pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), false);
+		try
+		{
+			pointerPage.removePointer(pointer);
+		}
+		finally
+		{
+			_pageManager.updateAndReleasePage(pointerPageId, pointerPage.rawPage());
 		}
 	}
 

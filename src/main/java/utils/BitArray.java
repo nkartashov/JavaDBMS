@@ -83,6 +83,24 @@ public class BitArray
 		return -1;
 	}
 
+	public int firstClearBit()
+	{
+		return nextClearBit(0);
+	}
+
+	public int firstSetBit()
+	{
+		return nextSetBit(0);
+	}
+
+	public int lastSetBit()
+	{
+		for (int i = _size - 1; i >= 0; --i)
+			if (isSet(i))
+				return i;
+		return -1;
+	}
+
 	public boolean isClear(int index)
 	{
 		return (_bytes[byteIndex(index)] & leftShiftOne(bitIndex(index))) == 0;

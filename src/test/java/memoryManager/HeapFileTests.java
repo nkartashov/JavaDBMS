@@ -53,7 +53,30 @@ public class HeapFileTests
 	}
 
 	@Test
-	public void Insert50000RowsTest()
+	public void EmptySelectTest()
+	{
+		DbContext context = new DbContext(RESOURCE_PATH);
+
+		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
+		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
+		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
+		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
+		tuples.add(columnTuple1);
+		tuples.add(columnTuple2);
+		tuples.add(columnTuple3);
+		String tableName = "testTablegfsgdfks";
+		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
+
+		createTableCommand.executeCommand(context);
+
+		SelectCommand selectCommand = new SelectCommand(tableName, null, 100);
+		selectCommand.executeCommand(context);
+
+		Assert.assertEquals(0, selectCommand.getResult().size());
+	}
+
+	@Test
+	public void Insert300RowsTest()
 	{
 		DbContext context = new DbContext(RESOURCE_PATH);
 
@@ -378,6 +401,58 @@ public class HeapFileTests
 
 		context.close();
 	}
+
+	@Test
+	public void DeleteTest()
+	{
+		DbContext context = new DbContext(RESOURCE_PATH);
+
+		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
+		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
+		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
+		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
+		tuples.add(columnTuple1);
+		tuples.add(columnTuple2);
+		tuples.add(columnTuple3);
+		String tableName = "testTabljkglkfagdfasdhfegfsgdfks";
+		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
+
+		createTableCommand.executeCommand(context);
+
+		ArrayList<String> args = new ArrayList<String>();
+		args.add("4");
+		args.add("gjghjf");
+		args.add("k");
+		TableRow tableRow = new TableRow(args);
+		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+
+		int numberOfRows = 300;
+
+		for (int i = 0; i < numberOfRows; ++i)
+		{
+			rows.add(tableRow);
+		}
+		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
+		insertRowsCommand.executeCommand(context);
+		SelectAllRowsCommand selectAllRowsCommand = new SelectAllRowsCommand(tableName);
+		selectAllRowsCommand.executeCommand(context);
+		List<Object> result = selectAllRowsCommand.getResult();
+
+		Assert.assertNotEquals(null, result);
+
+		Assert.assertEquals(numberOfRows, result.size());
+
+		DeleteCommand deleteCommand = new DeleteCommand(tableName, null);
+		deleteCommand.executeCommand(context);
+
+		SelectCommand selectCommand = new SelectCommand(tableName, null, numberOfRows);
+		selectCommand.executeCommand(context);
+
+		Assert.assertEquals(0, selectCommand.getResult().size());
+
+		context.close();
+	}
+
 
 
 	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";

@@ -88,7 +88,6 @@ public class BitArrayTests
 		for (int i: testBits)
 			test.set(i);
 
-
 		byte[] byteRepr = test.toByteArray();
 
 		BitArray bitArray = new BitArray(byteRepr);
@@ -97,7 +96,65 @@ public class BitArrayTests
 
 		for (int i = 0; i < test.size(); ++i)
 			Assert.assertEquals(test.get(i), bitArray.get(i));
-
 	}
 
+	@Test
+	public void LastSetBitTest()
+	{
+		BitArray test = new BitArray(47);
+		int[] testBits = {0, 2, 7, 9, 10, 15, 27, 32, 44, 46};
+
+		for (int i: testBits)
+			test.set(i);
+
+		Assert.assertEquals(testBits[testBits.length - 1], test.lastSetBit());
+	}
+
+	@Test
+	public void FirstClearBitTestEasy()
+	{
+		BitArray test = new BitArray(47);
+		int[] testBits = {0, 1, 2, 7, 9, 10, 15, 27, 32, 44, 46};
+
+		for (int i: testBits)
+			test.set(i);
+
+		Assert.assertEquals(3, test.firstClearBit());
+	}
+
+	@Test
+	public void FirstClearBitTestComplex()
+	{
+		BitArray test = new BitArray(47);
+		int[] testBits = {0, 1, 2, 3, 4, 5, 6,  7, 8, 9, 10, 15, 27, 32, 44, 46};
+
+		for (int i: testBits)
+			test.set(i);
+
+		Assert.assertEquals(11, test.firstClearBit());
+	}
+
+	@Test
+	public void FirstSetBitTestEasy()
+	{
+		BitArray test = new BitArray(47);
+		int[] testBits = {0, 1, 2, 3, 4, 5, 6,  7, 8, 9, 10, 15, 27, 32, 44, 46};
+
+		for (int i: testBits)
+			test.set(i);
+
+		Assert.assertEquals(testBits[0], test.firstSetBit());
+	}
+
+	@Test
+	public void FirstSetBitTestComplex()
+	{
+		BitArray test = new BitArray(47);
+		int[] testBits = {9, 10, 15, 27, 32, 44, 46};
+
+		for (int i: testBits)
+			test.set(i);
+
+		Assert.assertEquals(testBits[0], test.firstSetBit());
+	}
 }
