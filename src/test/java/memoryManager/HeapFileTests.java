@@ -4,7 +4,6 @@ import dbCommands.*;
 import dbEnvironment.DbContext;
 import org.junit.Assert;
 import org.junit.Test;
-import queryParser.SQLParser;
 import tableTypes.BaseTableType;
 import tableTypes.ColumnTuple;
 import tableTypes.Table;
@@ -380,5 +379,38 @@ public class HeapFileTests
 		context.close();
 	}
 
-	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";
+    @Test
+    public void SelectAllTest() {
+        DbContext context = new DbContext(RESOURCE_PATH);
+
+        ColumnTuple columnTuple1 = new ColumnTuple("column1", 4, "int");
+        ColumnTuple columnTuple2 = new ColumnTuple("column2", 16, "char");
+        ColumnTuple columnTuple3 = new ColumnTuple("col3", 2, "char");
+        ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
+        tuples.add(columnTuple1);
+        tuples.add(columnTuple2);
+        tuples.add(columnTuple3);
+        String tableName = "testTablegfsgdfks";
+        CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
+
+        createTableCommand.executeCommand(context);
+
+        ArrayList<String> args = new ArrayList<String>();
+        args.add("4");
+        args.add("gjghjf");
+        args.add("k");
+        TableRow tableRow = new TableRow(args);
+        ArrayList<TableRow> rows = new ArrayList<TableRow>();
+
+        int numberOfRows = 300;
+
+        for (int i = 0; i < numberOfRows; ++i)
+        {
+            rows.add(tableRow);
+        }
+    }
+
+
+	//private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";
+    private static final String RESOURCE_PATH = "/home/maratx/GitRepos/JavaDBMS/src/test/resources/";
 }
