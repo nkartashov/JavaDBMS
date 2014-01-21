@@ -21,8 +21,7 @@ import java.util.List;
  */
 public class HeapFileTests
 {
-	@Test
-	public void SeedFileTest()
+	DbContext initBasicContext(String tableName)
 	{
 		DbContext context = new DbContext(RESOURCE_PATH);
 
@@ -33,10 +32,18 @@ public class HeapFileTests
 		tuples.add(columnTuple1);
 		tuples.add(columnTuple2);
 		tuples.add(columnTuple3);
-		String tableName = "testTable";
 		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
 
 		createTableCommand.executeCommand(context);
+
+		return context;
+	}
+
+	@Test
+	public void SeedFileTest()
+	{
+		String tableName = "testTable";
+		DbContext context = initBasicContext(tableName);
 
 		Table newTable = context.tables().get(tableName);
 
@@ -55,20 +62,8 @@ public class HeapFileTests
 	@Test
 	public void EmptySelectTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTablegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
-
+		DbContext context = initBasicContext(tableName);
 		SelectCommand selectCommand = new SelectCommand(tableName, null, 100);
 		selectCommand.executeCommand(context);
 
@@ -78,19 +73,8 @@ public class HeapFileTests
 	@Test
 	public void Insert300RowsTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTablegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -121,19 +105,8 @@ public class HeapFileTests
 	@Test
 	public void HugeInsertTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
-		String tableName = "testTablegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		String tableName = "testTableghsadfhjsdffsgdfks";
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -142,7 +115,7 @@ public class HeapFileTests
 		TableRow tableRow = new TableRow(args);
 		ArrayList<TableRow> rows = new ArrayList<TableRow>();
 
-		int numberOfRows = 50000;
+		int numberOfRows = 86500;
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{
@@ -164,20 +137,8 @@ public class HeapFileTests
 	@Test
 	public void SimpleInsertAndDecodeTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-
-		ArrayList <ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTabsdfgasdflegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -224,20 +185,8 @@ public class HeapFileTests
 	@Test
 	public void ComplexInsertAndDecodeTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-
-		ArrayList <ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTabsdfgfasdflhsgdfkahsdlkfgasljdgfasdflegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -284,20 +233,8 @@ public class HeapFileTests
 	@Test
 	public void BoundSelectTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-
-		ArrayList <ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTabsdasbflaksdbfklfgasdflegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -331,20 +268,8 @@ public class HeapFileTests
 	@Test
 	public void SimpleUpdateAllTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-
-		ArrayList <ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTabsdfgasdjfkahsdfflegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -405,19 +330,8 @@ public class HeapFileTests
 	@Test
 	public void DeleteTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTabljkglkfagdfasdhfegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -452,8 +366,6 @@ public class HeapFileTests
 
 		context.close();
 	}
-
-
 
 	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";
 }
