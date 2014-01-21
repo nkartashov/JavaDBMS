@@ -4,6 +4,7 @@ import dbCommands.*;
 import dbEnvironment.DbContext;
 import org.junit.Assert;
 import org.junit.Test;
+import queryParser.SQLParser;
 import tableTypes.Column;
 import tableTypes.ColumnTuple;
 import tableTypes.Table;
@@ -366,6 +367,50 @@ public class HeapFileTests
 		Assert.assertEquals(0, selectCommand.getResult().size());
 
 		context.close();
+	}
+
+	@Test
+	public void SelectWithPredicate()
+	{
+		String tableName = "sasai";
+		DbContext context = initBasicContext(tableName);
+
+		ArrayList<String> args = new ArrayList<String>();
+		args.add("4");
+		args.add("gjghjf");
+		args.add("k");
+		TableRow tableRow = new TableRow(args);
+		ArrayList<String> args1 = new ArrayList<String>();
+		args1.add("5");
+		args1.add("gjghjf");
+		args1.add("q");
+		TableRow tableRow1 = new TableRow(args1);
+		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+
+		int numberOfRows = 300;
+
+		for (int i = 0; i < numberOfRows; ++i)
+		{
+			rows.add(tableRow);
+			rows.add(tableRow1);
+		}
+
+		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
+		insertRowsCommand.executeCommand(context);
+
+		SelectCommand selectCommand = new SelectCommand(tableName, null, numberOfRows * 2);
+		selectCommand.executeCommand(context);
+
+		Assert.assertEquals(numberOfRows * 2, selectCommand.getResult().size());
+
+		String query = "SELECT * FROM " + tableName + " WHERE lol == 5 AND baz <> \"q\"";
+
+		SQLParser parser = new SQLParser(query, context);
+
+		SelectCommand selectCommand2 = (SelectCommand) parser.parse();
+		selectCommand2.executeCommand(context);
+
+		Assert.assertEquals(numberOfRows, selectCommand.getResult().size());
 	}
 
 	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";
