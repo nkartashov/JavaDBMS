@@ -77,12 +77,11 @@ public class DiskPage {
 	}
 
 
-
 	protected byte[] _rawPage;
 	protected long _nextPageIndex;
 	protected long _prevPageIndex;
 
-
 	protected static int NEXT_PAGE_INDEX_OFFSET = 0;
 	protected static int PREV_PAGE_INDEX_OFFSET = 8;
+	protected static final int DATA_PAGE_SIZE_IN_BYTES = 4000;
 }

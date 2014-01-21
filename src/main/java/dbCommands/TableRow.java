@@ -1,9 +1,10 @@
 package dbCommands;
 
 import org.apache.commons.lang3.ArrayUtils;
-import tableTypes.BaseTableType;
+import tableTypes.Column;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,13 +30,13 @@ public class TableRow
 		return _arguments.get(pos);
 	}
 
-	public byte[] getAsByteArray(ArrayList<BaseTableType> rowSignature)
+	public byte[] getAsByteArray(List<Column> rowSignature)
 	{
-		byte[] result = rowSignature.get(0).getAsByte(this, 0);
+		byte[] result = rowSignature.get(0).type().getAsByte(this, 0);
 
 		for (int i = 1; i < rowSignature.size(); ++i)
 		{
-			result = ArrayUtils.addAll(result, rowSignature.get(i).getAsByte(this, i));
+			result = ArrayUtils.addAll(result, rowSignature.get(i).type().getAsByte(this, i));
 		}
 
 		return result;

@@ -47,6 +47,7 @@ public class RowPage extends DiskPage
 	public void deleteRow(int rowId)
 	{
 		_isOccupied.clear(rowId);
+		updateOccupiedSet();
 	}
 
 	public boolean isFull()
@@ -114,6 +115,5 @@ public class RowPage extends DiskPage
 	private static final int BIT_MASK_OFFSET = 16;
 	private static final int BIT_MASK_SIZE_IN_BITS = 400;
 	private static final int BIT_MASK_SIZE_IN_BYTES = BIT_MASK_SIZE_IN_BITS / 8;
-	private static final int DATA_PAGE_SIZE_IN_BYTES = 4000;
 	private static final int MAX_ROWS_ON_PAGE = DATA_PAGE_SIZE_IN_BYTES / 4; // size of int
 }

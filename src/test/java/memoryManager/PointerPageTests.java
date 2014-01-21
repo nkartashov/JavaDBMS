@@ -28,7 +28,7 @@ public class PointerPageTests
 	}
 
 	@Test
-	public void CorrectAddingRemovalTest()
+	public void CorrectAddingSettingTest()
 	{
 		byte[] rawData = new byte[DiskPage.MAX_PAGE_SIZE];
 
@@ -40,12 +40,12 @@ public class PointerPageTests
 		newPage.addPointer(687);
 
 		Assert.assertEquals(newPage.pointersCount(), 1);
-		Assert.assertEquals(newPage.getLastPointer(), 687);
+		Assert.assertEquals(newPage.getPointer(newPage.pointersCount() - 1), 687);
 
 		newPage.addPointer(590);
 
 		Assert.assertEquals(newPage.pointersCount(), 2);
-		Assert.assertEquals(newPage.getLastPointer(), 590);
+		Assert.assertEquals(newPage.getPointer(newPage.pointersCount() - 1), 590);
 
 		newPage.setPointer(1, 198);
 
@@ -54,6 +54,32 @@ public class PointerPageTests
 		newPage = new PointerPage(dataPayload, false);
 
 		Assert.assertEquals(newPage.pointersCount(), 2);
-		Assert.assertEquals(newPage.getLastPointer(), 198);
+		Assert.assertEquals(newPage.getPointer(newPage.pointersCount() - 1), 198);
+	}
+
+	@Test
+	public void CorrectAddingRemoving()
+	{
+		byte[] rawData = new byte[DiskPage.MAX_PAGE_SIZE];
+
+		PointerPage newPage = new PointerPage(rawData, true);
+
+		Assert.assertTrue(newPage.isEmpty());
+		Assert.assertEquals(newPage.pointersCount(), 0);
+
+		long[] values = {687, 590, 127};
+
+		for (int i = 0; i < 3; ++i)
+		{
+			newPage.addPointer(values[i]);
+
+			Assert.assertEquals(newPage.pointersCount(), i + 1);
+			Assert.assertEquals(newPage.getPointer(newPage.pointersCount() - 1), values[i]);
+		}
+
+		newPage.removePointer(1);
+		long[] expectedValues = {687, 127};
+
+		Assert.assertArrayEquals(expectedValues, newPage.allPointers());
 	}
 }

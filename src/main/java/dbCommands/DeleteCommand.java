@@ -1,49 +1,34 @@
 package dbCommands;
 
-
 import dbEnvironment.DbContext;
 import memoryManager.HeapFile;
 import tableTypes.Table;
 
-import java.util.List;
-
-
 /**
  * Created with IntelliJ IDEA.
  * User: nikita_kartashov
- * Date: 04/12/2013
- * Time: 14:34
+ * Date: 16/01/2014
+ * Time: 22:10
  * To change this template use File | Settings | File Templates.
  */
-public class SelectAllRowsCommand implements DbCommand, DbResultCommand
+public class DeleteCommand implements DbCommand
 {
-	public SelectAllRowsCommand(String tableName)
+	public DeleteCommand(String tableName, RowPredicate predicate)
 	{
 		_tableName = tableName;
+		_predicate = predicate;
 	}
 
 	public void executeCommand(DbContext context)
 	{
-		_hasBeenExecuted = true;
 		Table tableToSelectFrom = context.getTableByName(_tableName);
 
 		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
 			tableToSelectFrom.rowSignature());
 
-		_result = tableHeapFile.selectAllRows();
+		tableHeapFile.deleteRows(_predicate);
 	}
 
-	public List<Object> getResult()
-	{
-		if (!_hasBeenExecuted)
-			return null;
-		return _result;
-	}
-
-    public String tableName() { return _tableName; }
-
-	private boolean _hasBeenExecuted = false;
 	private String _tableName;
-	private List<Object> _result;
-
+	private RowPredicate _predicate = null;
 }

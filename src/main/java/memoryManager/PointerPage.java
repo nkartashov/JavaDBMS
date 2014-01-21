@@ -1,5 +1,6 @@
 package memoryManager;
 
+import utils.BitArray;
 import utils.ByteConverter;
 
 /**
@@ -17,11 +18,11 @@ public class PointerPage extends DiskPage
 		if (blankPage)
 		{
 			initHeader(_rawPage);
-			_pointersCount = 0;
+			_isOccupied = new BitArray(MAX_POINTERS_COUNT);
 		}
 		else
 		{
-			_pointersCount = ByteConverter.intFromByte(_rawPage, COUNT_OFFSET);
+			_isOccupied = BitArray.readBitArray(rawPage, COUNT_OFFSET, MAX_POINTERS_COUNT);
 		}
 	}
 
@@ -30,11 +31,9 @@ public class PointerPage extends DiskPage
 		return ByteConverter.longFromByte(_rawPage, DATA_OFFSET + index * ByteConverter.LONG_LENGTH_IN_BYTES);
 	}
 
-	public long getLastPointer()
+	public long firstGreenPageIndex()
 	{
-		if (_pointersCount == 0)
-			return -1;
-		return getPointer(_pointersCount - 1);
+		return getPointer(_isOccupied.firstSetBit());
 	}
 
 	public void setPointer(int index, long pointer) throws IndexOutOfBoundsException
@@ -48,47 +47,53 @@ public class PointerPage extends DiskPage
 
 	public void addPointer(long pointer)
 	{
-		setPointer(_pointersCount++, pointer);
-		setPointersCount();
+		setPointer(_isOccupied.firstClearBit(), pointer);
+		_isOccupied.set(_isOccupied.firstClearBit());
+		updateOccupiedSet();
 	}
 
 	public void removePointer(int index)
 	{
-		if (index != _pointersCount - 1)
-		{
-			long lastPointer = getPointer(_pointersCount - 1);
-			setPointer(index, lastPointer);
-			--_pointersCount;
-			setPointersCount();
-		}
-		else
-			removeLastPointer();
+		_isOccupied.clear(index);
+		updateOccupiedSet();
 	}
 
 	public void removePointer(long pointer)
 	{
-		for (int i = 0; i < _pointersCount; ++i)
+		int i = -1;
+		while(true)
+		{
+			i = _isOccupied.nextSetBit(i + 1);
+			if (i == -1)
+				break;
 			if (getPointer(i) == pointer)
+			{
 				removePointer(i);
+				_isOccupied.clear(i);
+				updateOccupiedSet();
+				return;
+			}
+		}
 	}
 
-	public void removeLastPointer()
-	{
-		--_pointersCount;
-		setPointersCount();
-	}
+	public boolean isFull() {return _isOccupied.cardinality() == MAX_POINTERS_COUNT;}
 
-	public boolean isFull() {return _pointersCount == MAX_POINTERS_COUNT;}
+	public boolean isEmpty() {return _isOccupied.cardinality() == 0;}
 
-	public boolean isEmpty() {return _pointersCount == 0;}
-
-	public long pointersCount() {return _pointersCount;}
+	public int pointersCount() {return _isOccupied.cardinality();}
 
 	public long[] allPointers()
 	{
-		long[] result = new long[_pointersCount];
-		for (int i = 0; i < _pointersCount; ++i)
-			result[i] = getPointer(i);
+		long[] result = new long[pointersCount()];
+		int j = 0;
+		int i = -1;
+		while(true)
+		{
+			i = _isOccupied.nextSetBit(i + 1);
+			if (i == -1)
+				break;
+			result[j++] = getPointer(i);
+		}
 
 		return result;
 	}
@@ -96,22 +101,22 @@ public class PointerPage extends DiskPage
 	public static void initHeader(byte[] rawData)
 	{
 		DiskPage.initHeader(rawData);
-		setPointersCount(rawData, 0);
+		updateOccupiedSet(rawData, new BitArray(MAX_POINTERS_COUNT));
 	}
 
-	private void setPointersCount()
+	private void updateOccupiedSet()
 	{
-		setPointersCount(_rawPage, _pointersCount);
+		updateOccupiedSet(_rawPage, _isOccupied);
 	}
 
-	private static void setPointersCount(byte[] rawData, int count)
+	private static void updateOccupiedSet(byte[] rawData, BitArray array)
 	{
-		byte[] pointersCount = ByteConverter.intToByte(count);
-		System.arraycopy(pointersCount, 0, rawData, COUNT_OFFSET, ByteConverter.INT_LENGTH_IN_BYTES);
+		array.writeBitArray(rawData, COUNT_OFFSET);
 	}
 
-	private int _pointersCount = 0;
+	private BitArray _isOccupied;
 
-	private static int MAX_POINTERS_COUNT = 500;
+	private static int POINTER_SIZE_IN_BYTES = 8;
+	private static int MAX_POINTERS_COUNT = MAX_PAGE_SIZE / POINTER_SIZE_IN_BYTES;
 	private static int COUNT_OFFSET = 16;
 }
