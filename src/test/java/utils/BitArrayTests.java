@@ -157,4 +157,16 @@ public class BitArrayTests
 
 		Assert.assertEquals(testBits[0], test.firstSetBit());
 	}
+
+	@Test
+	public void CardinalityTest2()
+	{
+		final int MAX_POINTERS_COUNT = 500;
+		BitArray array = new BitArray(MAX_POINTERS_COUNT);
+
+		for (int i = 0; i < MAX_POINTERS_COUNT; ++i)
+			array.set(array.firstClearBit());
+
+		Assert.assertEquals(MAX_POINTERS_COUNT, array.cardinality());
+	}
 }

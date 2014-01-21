@@ -115,7 +115,7 @@ public class HeapFileTests
 		TableRow tableRow = new TableRow(args);
 		ArrayList<TableRow> rows = new ArrayList<TableRow>();
 
-		int numberOfRows = 86500;
+		int numberOfRows = 87000;
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{
@@ -123,6 +123,7 @@ public class HeapFileTests
 		}
 		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
 		insertRowsCommand.executeCommand(context);
+
 		SelectAllRowsCommand selectAllRowsCommand = new SelectAllRowsCommand(tableName);
 		selectAllRowsCommand.executeCommand(context);
 		List<Object> result = selectAllRowsCommand.getResult();
