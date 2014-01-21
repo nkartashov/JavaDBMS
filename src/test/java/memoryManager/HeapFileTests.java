@@ -4,6 +4,7 @@ import dbCommands.*;
 import dbEnvironment.DbContext;
 import org.junit.Assert;
 import org.junit.Test;
+import queryParser.SQLParser;
 import tableTypes.BaseTableType;
 import tableTypes.ColumnTuple;
 import tableTypes.Table;
@@ -378,7 +379,6 @@ public class HeapFileTests
 
 		context.close();
 	}
-
 
 	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";
 }

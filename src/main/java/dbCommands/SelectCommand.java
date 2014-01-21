@@ -40,6 +40,8 @@ public class SelectCommand implements DbCommand, DbResultCommand
 		return _result;
 	}
 
+    public RowPredicate predicate() { return _predicate; }
+
 	private boolean _hasBeenExecuted = false;
 	private String _tableName;
 	private RowPredicate _predicate = null;
