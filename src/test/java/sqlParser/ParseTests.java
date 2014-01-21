@@ -68,7 +68,7 @@ public class ParseTests {
     public void SelectWhereTest() {
         DbContext context = new DbContext(RESOURCE_PATH);
         String tableName = CreateTestTable(context);
-        String query = "SELECT * FROM " + tableName + " WHERE column1 > 3 AND col3 <> \"dog!\"";
+        String query = "SELECT * FROM " + tableName + " WHERE column1 > 3 AND col3 <> \"ccc5\"";
 
         SQLParser parser = new SQLParser(query, context);
         SelectCommand command = (SelectCommand) parser.parse();
@@ -81,9 +81,20 @@ public class ParseTests {
 
         Assert.assertEquals("{2}", conditions.get(1)._val1);
         Assert.assertEquals("<>", conditions.get(1)._operator);
-        Assert.assertEquals("\"dog!\"", conditions.get(1)._val2);
+        Assert.assertEquals("\"ccc5\"", conditions.get(1)._val2);
 
-        //Assert.assertEquals(predicate.evaluate(), true);
+        List<Object> test_row1 = new ArrayList<Object>();
+        test_row1.add(4);
+        test_row1.add("\"abc4\"");
+        test_row1.add("\"ccc4\"");
+
+        List<Object> test_row2 = new ArrayList<Object>();
+        test_row2.add(5);
+        test_row2.add("\"abc5\"");
+        test_row2.add("\"ccc5\"");
+
+        Assert.assertEquals(predicate.evaluate(test_row1), true);
+        Assert.assertEquals(predicate.evaluate(test_row2), false);
     }
 
     private static final String RESOURCE_PATH = "/home/maratx/GitRepos/JavaDBMS/src/test/resources/";

@@ -11,18 +11,18 @@ import java.util.List;
 
 public class SQLParser {
 
-    public SQLParser (String queryString, DbContext context) {
-        _query = queryString.trim().replaceAll(" +", " ").replaceAll(" +,", ",").replace(";", "");
+    public SQLParser (DbContext context) {
         _context = context;
     }
 
-    public DbCommand parse () {
-        String firstWord = _query.split(" ", 2)[0].toUpperCase();
+    public DbCommand parse (String query) {
+        query = query.trim().replaceAll(" +", " ").replaceAll(" +,", ",").replace(";", "");
+        String firstWord = query.split(" ", 2)[0].toUpperCase();
         if (firstWord.equals("CREATE")) {
-            String secondWord = _query.split(" ", 3)[1].toUpperCase();
+            String secondWord = query.split(" ", 3)[1].toUpperCase();
             if (secondWord.equals("TABLE")) {
-                if (Checkers.CheckCreateTable(_query)) {
-                    DbCommand ctCommand = parseCreateTable();
+                if (Checkers.CheckCreateTable(query)) {
+                    DbCommand ctCommand = parseCreateTable(query);
                     return ctCommand;
                 }
                 else {
@@ -32,25 +32,25 @@ public class SQLParser {
             }
         }
         if (firstWord.equals("INSERT")) {
-            String secondWord = _query.split(" ", 3)[1].toUpperCase();
+            String secondWord = query.split(" ", 3)[1].toUpperCase();
             if (secondWord.equals("INTO")) {
-                if (Checkers.CheckInsertInto(_query)) {
-                    DbCommand iiCommand = parseInsertInto();
+                if (Checkers.CheckInsertInto(query)) {
+                    DbCommand iiCommand = parseInsertInto(query);
                     return iiCommand;
                 }
             }
         }
         if (firstWord.equals("SELECT")) {
-            if (Checkers.CheckSelect(_query)) {
-                DbCommand selectCommand = parseSelect();
+            if (Checkers.CheckSelect(query)) {
+                DbCommand selectCommand = parseSelect(query);
                 return selectCommand;
             }
         }
         return null;
     }
 
-    private DbCommand parseCreateTable() {
-        String nameAndRes[] =  _query.split(" ", 4);
+    private DbCommand parseCreateTable(String query) {
+        String nameAndRes[] =  query.split(" ", 4);
         String name = nameAndRes[2];
         ArrayList<Object> tableParams = new ArrayList<Object>();
         tableParams.add(name);
@@ -71,8 +71,8 @@ public class SQLParser {
         return ctc;
     }
 
-    private DbCommand parseInsertInto() {
-        String nameAndRes[] =  _query.split(" ", 4);
+    private DbCommand parseInsertInto(String query) {
+        String nameAndRes[] =  query.split(" ", 4);
         String name = nameAndRes[2];
         String rows[] = nameAndRes[3].replace("VALUES", "").replace("(", "").trim().split("\\),");
         TableRow[] insertionList = new TableRow[rows.length];
@@ -89,13 +89,13 @@ public class SQLParser {
         return null;
     }
 
-    private DbCommand parseSelect() {
+    private DbCommand parseSelect(String query) {
         // !!! assuming that only SELECT * can be used !!!
-        String table_name = _query.split(" ", 5)[TABLE_NAME_POSITION].trim();
+        String table_name = query.split(" ", 5)[TABLE_NAME_POSITION].trim();
         RowPredicate predicate = null;
-        int index_of_where = _query.toUpperCase().indexOf("WHERE");
+        int index_of_where = query.toUpperCase().indexOf("WHERE");
         if (index_of_where != -1) {
-            predicate = parseWhere(table_name, _query.substring(index_of_where + WHERE_WORD_LENGTH));
+            predicate = parseWhere(table_name, query.substring(index_of_where + WHERE_WORD_LENGTH));
         }
         if(predicate != null) {
             return new SelectCommand(table_name, predicate, -1);
@@ -112,7 +112,8 @@ public class SQLParser {
         for(int i = 0; i < conditions.size(); ++i) {
             namesToColumnNumbers(table_name, conditions.get(i));
         }
-        return new RowPredicate(conditions);
+        List<Column> row_signature = _context.getTableByName(table_name).rowSignature();
+        return new RowPredicate(row_signature, conditions);
     }
 
     private void parseCondition(String query, List<SingleCondition> conditions) {
@@ -170,7 +171,6 @@ public class SQLParser {
         }
     }
 
-    private String _query;
     private DbContext _context;
     private boolean _error_occured = false;
 
