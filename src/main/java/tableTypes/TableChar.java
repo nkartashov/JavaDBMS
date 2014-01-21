@@ -18,7 +18,8 @@ public class TableChar extends BaseTableType {
 	    this.setSize(size + 1);
     }
 
-    @Override public String toString()
+    @Override
+    public String toString()
     {
         StringBuilder result = new StringBuilder("<type>char ");
         result.append(this.size());
@@ -43,5 +44,40 @@ public class TableChar extends BaseTableType {
 	public Object getAsObject(String s)
 	{
 		return s;
+	}
+
+	@Override public String toString()
+	{
+		return "<type>int</type>";
+	}
+
+	@Override
+	public byte[] getAsByte(TableRow row, int columnPos)
+	{
+		return ByteConverter.intToByte(row.getAsInt(columnPos));
+	}
+
+	@Override
+	public Object getAsObject(byte[] data, int offset, int size)
+	{
+		return ByteConverter.intFromByte(data, offset);
+	}
+
+	@Override
+	public Object getAsObject(String s)
+	{
+		return Integer.parseInt(s);
+	}
+
+	@Override
+	public boolean less(Object left, Object right)
+	{
+		return false;
+	}
+
+	@Override
+	public boolean greater(Object left, Object right)
+	{
+		return false;
 	}
 }

@@ -31,6 +31,13 @@ public abstract class BaseTableType {
 
 	public abstract Object getAsObject(String s);
 
+	public boolean equals(Object left, Object right) {return left.equals(right);}
+	public boolean notEquals(Object left, Object right) {return !equals(left, right);}
+	public abstract boolean less(Object left, Object right);
+	public abstract boolean greater(Object left, Object right);
+	public boolean lessOrEqual(Object left, Object right) {return !greater(left, right);}
+	public boolean greaterOrEqual(Object left, Object right) {return !less(left, right);}
+
     private int _size;
 }
 

@@ -39,4 +39,16 @@ public class TableInt extends BaseTableType {
 	{
 		return Integer.parseInt(s);
 	}
+
+	@Override
+	public boolean less(Object left, Object right)
+	{
+		return ((Integer) left) < ((Integer) right);
+	}
+
+	@Override
+	public boolean greater(Object left, Object right)
+	{
+		return ((Integer) left) > ((Integer) right);
+	}
 }
