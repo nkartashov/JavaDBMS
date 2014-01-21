@@ -4,7 +4,7 @@ import dbCommands.*;
 import dbEnvironment.DbContext;
 import org.junit.Assert;
 import org.junit.Test;
-import tableTypes.BaseTableType;
+import tableTypes.Column;
 import tableTypes.ColumnTuple;
 import tableTypes.Table;
 
@@ -21,8 +21,7 @@ import java.util.List;
  */
 public class HeapFileTests
 {
-	@Test
-	public void SeedFileTest()
+	DbContext initBasicContext(String tableName)
 	{
 		DbContext context = new DbContext(RESOURCE_PATH);
 
@@ -33,10 +32,18 @@ public class HeapFileTests
 		tuples.add(columnTuple1);
 		tuples.add(columnTuple2);
 		tuples.add(columnTuple3);
-		String tableName = "testTable";
 		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
 
 		createTableCommand.executeCommand(context);
+
+		return context;
+	}
+
+	@Test
+	public void SeedFileTest()
+	{
+		String tableName = "testTable";
+		DbContext context = initBasicContext(tableName);
 
 		Table newTable = context.tables().get(tableName);
 
@@ -53,21 +60,21 @@ public class HeapFileTests
 	}
 
 	@Test
-	public void Insert50000RowsTest()
+	public void EmptySelectTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTablegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
+		DbContext context = initBasicContext(tableName);
+		SelectCommand selectCommand = new SelectCommand(tableName, null, 100);
+		selectCommand.executeCommand(context);
 
-		createTableCommand.executeCommand(context);
+		Assert.assertEquals(0, selectCommand.getResult().size());
+	}
+
+	@Test
+	public void Insert300RowsTest()
+	{
+		String tableName = "testTablegfsgdfks";
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -98,19 +105,8 @@ public class HeapFileTests
 	@Test
 	public void HugeInsertTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
-		String tableName = "testTablegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		String tableName = "testTableghsadfhjsdffsgdfks";
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -119,7 +115,7 @@ public class HeapFileTests
 		TableRow tableRow = new TableRow(args);
 		ArrayList<TableRow> rows = new ArrayList<TableRow>();
 
-		int numberOfRows = 50000;
+		int numberOfRows = 87000;
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{
@@ -127,6 +123,7 @@ public class HeapFileTests
 		}
 		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
 		insertRowsCommand.executeCommand(context);
+
 		SelectAllRowsCommand selectAllRowsCommand = new SelectAllRowsCommand(tableName);
 		selectAllRowsCommand.executeCommand(context);
 		List<Object> result = selectAllRowsCommand.getResult();
@@ -141,20 +138,8 @@ public class HeapFileTests
 	@Test
 	public void SimpleInsertAndDecodeTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-
-		ArrayList <ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTabsdfgasdflegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -181,12 +166,12 @@ public class HeapFileTests
 		Assert.assertEquals(numberOfRows, result.size());
 
 		Table table = context.getTableByName(tableName);
-		ArrayList<BaseTableType> rowSignature = table.rowSignature();
+		List<Column> rowSignature = table.rowSignature();
 
 		ArrayList<Object> expected = new ArrayList<Object>();
 
 		for (int i = 0; i < args.size(); ++i)
-			expected.add(rowSignature.get(i).getAsObject(args.get(i)));
+			expected.add(rowSignature.get(i).type().getAsObject(args.get(i)));
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{
@@ -201,20 +186,8 @@ public class HeapFileTests
 	@Test
 	public void ComplexInsertAndDecodeTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-
-		ArrayList <ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTabsdfgfasdflhsgdfkahsdlkfgasljdgfasdflegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -241,12 +214,12 @@ public class HeapFileTests
 		Assert.assertEquals(numberOfRows, result.size());
 
 		Table table = context.getTableByName(tableName);
-		ArrayList<BaseTableType> rowSignature = table.rowSignature();
+		List<Column> rowSignature = table.rowSignature();
 
 		ArrayList<Object> expected = new ArrayList<Object>();
 
 		for (int i = 0; i < args.size(); ++i)
-			expected.add(rowSignature.get(i).getAsObject(args.get(i)));
+			expected.add(rowSignature.get(i).type().getAsObject(args.get(i)));
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{
@@ -261,20 +234,8 @@ public class HeapFileTests
 	@Test
 	public void BoundSelectTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-
-		ArrayList <ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTabsdasbflaksdbfklfgasdflegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -308,20 +269,8 @@ public class HeapFileTests
 	@Test
 	public void SimpleUpdateAllTest()
 	{
-		DbContext context = new DbContext(RESOURCE_PATH);
-
-		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
-		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
-
-		ArrayList <ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-		tuples.add(columnTuple1);
-		tuples.add(columnTuple2);
-		tuples.add(columnTuple3);
 		String tableName = "testTabsdfgasdjfkahsdfflegfsgdfks";
-		CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
-
-		createTableCommand.executeCommand(context);
+		DbContext context = initBasicContext(tableName);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("4");
@@ -362,16 +311,16 @@ public class HeapFileTests
 		Assert.assertEquals(expectedRowCount, result.size());
 
 		Table table = context.getTableByName(tableName);
-		ArrayList<BaseTableType> rowSignature = table.rowSignature();
+		List<Column> rowSignature = table.rowSignature();
 
-		ArrayList<Object> expected = new ArrayList<Object>();
+		List<Object> expected = new ArrayList<Object>();
 
 		for (int i = 0; i < args.size(); ++i)
-			expected.add(rowSignature.get(i).getAsObject(newArgs.get(i)));
+			expected.add(rowSignature.get(i).type().getAsObject(newArgs.get(i)));
 
 		for (int i = 0; i < expectedRowCount; ++i)
 		{
-			ArrayList<Object> actual = (ArrayList<Object>) result.get(i);
+			List<Object> actual = (ArrayList<Object>) result.get(i);
 			for (int j = 0; j < actual.size(); ++j)
 				Assert.assertEquals(expected.get(j), actual.get(j));
 		}
@@ -379,38 +328,45 @@ public class HeapFileTests
 		context.close();
 	}
 
-    @Test
-    public void SelectAllTest() {
-        DbContext context = new DbContext(RESOURCE_PATH);
+	@Test
+	public void DeleteTest()
+	{
+		String tableName = "testTabljkglkfagdfasdhfegfsgdfks";
+		DbContext context = initBasicContext(tableName);
 
-        ColumnTuple columnTuple1 = new ColumnTuple("column1", 4, "int");
-        ColumnTuple columnTuple2 = new ColumnTuple("column2", 16, "char");
-        ColumnTuple columnTuple3 = new ColumnTuple("col3", 2, "char");
-        ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
-        tuples.add(columnTuple1);
-        tuples.add(columnTuple2);
-        tuples.add(columnTuple3);
-        String tableName = "testTablegfsgdfks";
-        CreateTableCommand createTableCommand = new CreateTableCommand(tableName, tuples);
+		ArrayList<String> args = new ArrayList<String>();
+		args.add("4");
+		args.add("gjghjf");
+		args.add("k");
+		TableRow tableRow = new TableRow(args);
+		ArrayList<TableRow> rows = new ArrayList<TableRow>();
 
-        createTableCommand.executeCommand(context);
+		int numberOfRows = 300;
 
-        ArrayList<String> args = new ArrayList<String>();
-        args.add("4");
-        args.add("gjghjf");
-        args.add("k");
-        TableRow tableRow = new TableRow(args);
-        ArrayList<TableRow> rows = new ArrayList<TableRow>();
+		for (int i = 0; i < numberOfRows; ++i)
+		{
+			rows.add(tableRow);
+		}
+		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
+		insertRowsCommand.executeCommand(context);
+		SelectAllRowsCommand selectAllRowsCommand = new SelectAllRowsCommand(tableName);
+		selectAllRowsCommand.executeCommand(context);
+		List<Object> result = selectAllRowsCommand.getResult();
 
-        int numberOfRows = 300;
+		Assert.assertNotEquals(null, result);
 
-        for (int i = 0; i < numberOfRows; ++i)
-        {
-            rows.add(tableRow);
-        }
-    }
+		Assert.assertEquals(numberOfRows, result.size());
 
+		DeleteCommand deleteCommand = new DeleteCommand(tableName, null);
+		deleteCommand.executeCommand(context);
 
-	//private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";
-    private static final String RESOURCE_PATH = "/home/maratx/GitRepos/JavaDBMS/src/test/resources/";
+		SelectCommand selectCommand = new SelectCommand(tableName, null, numberOfRows);
+		selectCommand.executeCommand(context);
+
+		Assert.assertEquals(0, selectCommand.getResult().size());
+
+		context.close();
+	}
+
+	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";
 }

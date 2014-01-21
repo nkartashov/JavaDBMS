@@ -82,4 +82,17 @@ public class PointerPageTests
 
 		Assert.assertArrayEquals(expectedValues, newPage.allPointers());
 	}
+
+	@Test
+	public void PageFullTest()
+	{
+		byte[] rawData = new byte[DiskPage.MAX_PAGE_SIZE];
+
+		PointerPage newPage = new PointerPage(rawData, true);
+
+		for (int i = 0; i < 500; ++i)
+			newPage.addPointer(i);
+
+		Assert.assertTrue(newPage.isFull());
+	}
 }

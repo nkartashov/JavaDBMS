@@ -1,15 +1,13 @@
 package queryParser;
 
+import dbCommands.*;
+import dbEnvironment.DbContext;
+import tableTypes.Column;
+import tableTypes.ColumnTuple;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
-import dbCommands.*;
-import dbEnvironment.DbContext;
-import org.apache.commons.lang3.ArrayUtils;
-import tableTypes.Column;
-import tableTypes.ColumnTuple;
 
 public class SQLParser {
 
@@ -153,7 +151,7 @@ public class SQLParser {
     }
 
     private void namesToColumnNumbers(String table_name, SingleCondition condition) {
-        List<Column> columns = _context.getTableByName(table_name).columns();
+        List<Column> columns = _context.getTableByName(table_name).rowSignature();
         if(!condition._val1.contains("\"")) {
             for (int i = 0; i < columns.size(); ++i) {
                 if (columns.get(i).name().compareTo(condition._val1) == 0) {

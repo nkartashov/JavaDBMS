@@ -18,7 +18,8 @@ public class TableChar extends BaseTableType {
 	    this.setSize(size + 1);
     }
 
-    @Override public String toString()
+    @Override
+    public String toString()
     {
         StringBuilder result = new StringBuilder("<type>char ");
         result.append(this.size());
@@ -43,5 +44,17 @@ public class TableChar extends BaseTableType {
 	public Object getAsObject(String s)
 	{
 		return s;
+	}
+
+	@Override
+	public boolean less(Object left, Object right)
+	{
+		return false;
+	}
+
+	@Override
+	public boolean greater(Object left, Object right)
+	{
+		return false;
 	}
 }
