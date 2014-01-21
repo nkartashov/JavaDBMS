@@ -17,7 +17,14 @@ public class RowPredicate
         _conditions = conditions;
     }
 
-	public boolean evaluate(List<Object> row) {return true;}
+	public boolean evaluate(List<Object> row) {
+//        for (SingleCondition cond : _conditions) {
+//
+//        }
+        return true;
+    }
+
+    public List<SingleCondition> conditions() { return _conditions; }
 
     private List<SingleCondition> _conditions;
 }

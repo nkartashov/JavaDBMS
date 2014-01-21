@@ -46,29 +46,6 @@ public class TableChar extends BaseTableType {
 		return s;
 	}
 
-	@Override public String toString()
-	{
-		return "<type>int</type>";
-	}
-
-	@Override
-	public byte[] getAsByte(TableRow row, int columnPos)
-	{
-		return ByteConverter.intToByte(row.getAsInt(columnPos));
-	}
-
-	@Override
-	public Object getAsObject(byte[] data, int offset, int size)
-	{
-		return ByteConverter.intFromByte(data, offset);
-	}
-
-	@Override
-	public Object getAsObject(String s)
-	{
-		return Integer.parseInt(s);
-	}
-
 	@Override
 	public boolean less(Object left, Object right)
 	{

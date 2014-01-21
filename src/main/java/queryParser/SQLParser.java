@@ -1,13 +1,15 @@
 package queryParser;
 
-import dbCommands.*;
-import dbEnvironment.DbContext;
-import tableTypes.Column;
-import tableTypes.ColumnTuple;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import dbCommands.*;
+import dbEnvironment.DbContext;
+import org.apache.commons.lang3.ArrayUtils;
+import tableTypes.Column;
+import tableTypes.ColumnTuple;
 
 public class SQLParser {
 
@@ -116,7 +118,7 @@ public class SQLParser {
     }
 
     private void parseCondition(String query, List<SingleCondition> conditions) {
-        String[] cond_array = query.split("and", 2);
+        String[] cond_array = query.split("AND | and", 2);
         String operator = findCompOperator(cond_array[0]);
         if(operator == null) {
             _error_occured = true;
@@ -132,33 +134,40 @@ public class SQLParser {
 
     private String findCompOperator(String query) {
         String operator;
-        if (query.indexOf(">") != -1) {
-            operator = ">";
-        }
-        else if (query.indexOf("<") != -1) {
+        if (query.indexOf("<") != -1) {
             operator = "<";
+        }
+        else if (query.indexOf(">") != -1) {
+            operator = ">";
         }
         else if (query.indexOf("=") != -1) {
             operator = "=";
         }
         else return null;
         int index = query.indexOf(operator);
-        operator.concat(query.substring(index, index + 1));
+        String second_part = query.substring(index + 1, index + 2);
+        if(second_part.equals("<") || second_part.equals(">") || second_part.equals("=")) {
+            return operator + second_part;
+        }
         return operator;
     }
 
     private void namesToColumnNumbers(String table_name, SingleCondition condition) {
-        List<Column> columns = _context.getTableByName(table_name).rowSignature();
-        for (int i = 0; i < columns.size(); ++i) {
-            if (columns.get(i).name().compareTo(condition._val1) == 0) {
-                condition._val1 = "{" + Integer.toString(i) + "}";
-                break;
+        List<Column> columns = _context.getTableByName(table_name).columns();
+        if(!condition._val1.contains("\"")) {
+            for (int i = 0; i < columns.size(); ++i) {
+                if (columns.get(i).name().compareTo(condition._val1) == 0) {
+                    condition._val1 = "{" + Integer.toString(i) + "}";
+                    break;
+                }
             }
         }
-        for (int i = 0; i < columns.size(); ++i) {
-            if (columns.get(i).name().compareTo(condition._val2) == 0) {
-                condition._val2 = "{" + Integer.toString(i) + "}";
-                break;
+        if(!condition._val2.contains("\"")) {
+            for (int i = 0; i < columns.size(); ++i) {
+                if (columns.get(i).name().compareTo(condition._val2) == 0) {
+                    condition._val2 = "{" + Integer.toString(i) + "}";
+                    break;
+                }
             }
         }
     }

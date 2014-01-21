@@ -40,6 +40,8 @@ public class SelectAllRowsCommand implements DbCommand, DbResultCommand
 		return _result;
 	}
 
+    public String tableName() { return _tableName; }
+
 	private boolean _hasBeenExecuted = false;
 	private String _tableName;
 	private List<Object> _result;
