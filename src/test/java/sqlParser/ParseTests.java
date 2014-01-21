@@ -82,6 +82,8 @@ public class ParseTests {
         Assert.assertEquals("{2}", conditions.get(1)._val1);
         Assert.assertEquals("<>", conditions.get(1)._operator);
         Assert.assertEquals("\"dog!\"", conditions.get(1)._val2);
+
+        //Assert.assertEquals(predicate.evaluate(), true);
     }
 
     private static final String RESOURCE_PATH = "/home/maratx/GitRepos/JavaDBMS/src/test/resources/";
