@@ -117,6 +117,6 @@ public class PointerPage extends DiskPage
 	private BitArray _isOccupied;
 
 	private static int POINTER_SIZE_IN_BYTES = 8;
-	private static int MAX_POINTERS_COUNT = MAX_PAGE_SIZE / POINTER_SIZE_IN_BYTES;
+	private static int MAX_POINTERS_COUNT = DATA_PAGE_SIZE_IN_BYTES / POINTER_SIZE_IN_BYTES;
 	private static int COUNT_OFFSET = 16;
 }
