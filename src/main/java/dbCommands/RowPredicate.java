@@ -18,10 +18,44 @@ public class RowPredicate
     }
 
 	public boolean evaluate(List<Object> row) {
-//        for (SingleCondition cond : _conditions) {
-//
-//        }
+        for (SingleCondition cond : _conditions) {
+            Object val1 = getValue(cond._val1, row);
+            Object val2 = getValue(cond._val2, row);
+
+//            if(cond._operator.equals(">")) {
+//                if (<=) return false;
+//            }
+//            if(cond._operator.equals("<")) {
+//                if (>=) return false;
+//            }
+//            if(cond._operator.equals(">=")) {
+//                if (<) return false;
+//            }
+//            if(cond._operator.equals("<=")) {
+//                if (>) return false;
+//            }
+//            if(cond._operator.equals("==")) {
+//                if (!=) return false;
+//            }
+//            if(cond._operator.equals("<>")) {
+//                if (==) return false;
+//            }
+        }
         return true;
+    }
+
+    private Object getValue(String raw_val, List<Object> row) {
+        if (raw_val.indexOf('{') != -1) {
+            return row.get(Integer.valueOf(raw_val.replaceAll("[{}]", "")));
+        }
+        else {
+            if (raw_val.matches("-?\\d+(\\.\\d+)?")) {
+                return Integer.valueOf(raw_val);
+            }
+            else {
+                return raw_val;
+            }
+        }
     }
 
     public List<SingleCondition> conditions() { return _conditions; }
