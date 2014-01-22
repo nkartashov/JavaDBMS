@@ -2,8 +2,8 @@ package sqlParser;
 
 import dbCommands.*;
 import dbEnvironment.DbContext;
-import junit.framework.Assert;
 import org.junit.Test;
+import org.junit.Assert;
 import queryParser.SQLParser;
 import queryParser.SingleCondition;
 import tableTypes.ColumnTuple;
@@ -97,5 +97,5 @@ public class ParseTests {
         Assert.assertEquals(predicate.evaluate(test_row2), false);
     }
 
-    private static final String RESOURCE_PATH = "/home/maratx/GitRepos/JavaDBMS/src/test/resources/";
+	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/";
 }

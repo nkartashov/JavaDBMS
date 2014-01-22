@@ -45,24 +45,24 @@ public class HeapFile
 	public void deleteRows(RowPredicate predicate)
 	{
 		PageId greenPointerPageId = localPageId(FIRST_GREEN_POINTER_PAGE_INDEX);
-		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		_pageManager.releasePage(greenPointerPageId);
 
 		while (greenPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
 		{
 			if (!greenPointerPage.isEmpty())
-				deleteAllPointers(greenPointerPage.allPointers(), predicate, false);
+				deleteAllPointers(greenPointerPage.allPointers(), predicate, DiskPage.NOT_BLANK_PAGE);
 
 			greenPointerPageId = localPageId(greenPointerPage.nextPageIndex());
-			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 			_pageManager.releasePage(greenPointerPageId);
 		}
 
 		if (!greenPointerPage.isEmpty())
-			deleteAllPointers(greenPointerPage.allPointers(), predicate, false);
+			deleteAllPointers(greenPointerPage.allPointers(), predicate, DiskPage.NOT_BLANK_PAGE);
 
 		PageId redPointerPageId = localPageId(FIRST_RED_POINTER_PAGE_INDEX);
-		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
+		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		_pageManager.releasePage(redPointerPageId);
 
 		while (redPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
@@ -78,7 +78,7 @@ public class HeapFile
 			}
 
 			redPointerPageId = localPageId(redPointerPage.nextPageIndex());
-			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
+			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), DiskPage.NOT_BLANK_PAGE);
 			_pageManager.releasePage(redPointerPageId);
 		}
 
@@ -107,9 +107,9 @@ public class HeapFile
 
 	private boolean deleteAllRowsFromPage(long pageNumber, RowPredicate predicate)
 	{
-		boolean deletionsHappened = false;
+		boolean deletionsHappened = DiskPage.NOT_BLANK_PAGE;
 		PageId pageId = localPageId(pageNumber);
-		RowPage page = new RowPage(_pageManager.getPage(pageId), false, _rowSize);
+		RowPage page = new RowPage(_pageManager.getPage(pageId), DiskPage.NOT_BLANK_PAGE, _rowSize);
 		try
 		{
 			ArrayList<Integer> rowList = null;
@@ -119,8 +119,8 @@ public class HeapFile
 				return deletionsHappened;
 			for (Integer rowNumber: rowList)
 			{
-				List<Object> rowAsObject = selectRowFromPage(pageNumber, rowNumber);
-				if (predicate != null)
+				List<Object> rowAsObject = selectRowFromPage(page, rowNumber);
+				if (predicate != RowPredicate.TRUE_PREDICATE)
 				{
 					if (predicate.evaluate(rowAsObject))
 					{
@@ -145,10 +145,10 @@ public class HeapFile
 	public void insertRow(TableRow row)
 	{
 		PageId notEmptyGreenPointerPageId = localPageId(getNotEmptyGreenPointerPageIndex());
-		PointerPage notEmptyGreenPointerPage = new PointerPage(_pageManager.getPage(notEmptyGreenPointerPageId), false);
+		PointerPage notEmptyGreenPointerPage = new PointerPage(_pageManager.getPage(notEmptyGreenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 
 		PageId greenPageId = localPageId(notEmptyGreenPointerPage.firstGreenPageIndex());
-		RowPage greenPage = new RowPage(_pageManager.getPage(greenPageId), false, _rowSize);
+		RowPage greenPage = new RowPage(_pageManager.getPage(greenPageId), DiskPage.NOT_BLANK_PAGE, _rowSize);
 		boolean pointerPageHasBecomeFull = false;
 		try
 		{
@@ -175,7 +175,7 @@ public class HeapFile
 	public void updateRows(RowPredicate predicate, TableRow row)
 	{
 		PageId redPointerPageId = localPageId(FIRST_RED_POINTER_PAGE_INDEX);
-		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
+		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		_pageManager.releasePage(redPointerPageId);
 
 		while (redPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
@@ -184,7 +184,7 @@ public class HeapFile
 				updateAllPointers(redPointerPage.allPointers(), predicate, row);
 
 			redPointerPageId = localPageId(redPointerPage.nextPageIndex());
-			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
+			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), DiskPage.NOT_BLANK_PAGE);
 			_pageManager.releasePage(redPointerPageId);
 		}
 
@@ -192,7 +192,7 @@ public class HeapFile
 			updateAllPointers(redPointerPage.allPointers(), predicate, row);
 
 		PageId greenPointerPageId = localPageId(FIRST_GREEN_POINTER_PAGE_INDEX);
-		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		_pageManager.releasePage(greenPointerPageId);
 
 		while (greenPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
@@ -201,7 +201,7 @@ public class HeapFile
 				updateAllPointers(greenPointerPage.allPointers(), predicate, row);
 
 			greenPointerPageId = localPageId(greenPointerPage.nextPageIndex());
-			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 			_pageManager.releasePage(greenPointerPageId);
 		}
 
@@ -220,7 +220,7 @@ public class HeapFile
 		byte[] byteRow = row.getAsByteArray(_rowSignature);
 
 		PageId pageId = localPageId(pageNumber);
-		RowPage page = new RowPage(_pageManager.getPage(pageId), false, _rowSize);
+		RowPage page = new RowPage(_pageManager.getPage(pageId), DiskPage.NOT_BLANK_PAGE, _rowSize);
 		try
 		{
 			ArrayList<Integer> rowList = null;
@@ -230,8 +230,8 @@ public class HeapFile
 				return;
 			for (Integer rowNumber: rowList)
 			{
-				List<Object> rowAsObject = selectRowFromPage(pageNumber, rowNumber);
-				if (predicate != null)
+				List<Object> rowAsObject = selectRowFromPage(page, rowNumber);
+				if (predicate != RowPredicate.TRUE_PREDICATE)
 				{
 					if (predicate.evaluate(rowAsObject))
 						page.setRow(rowNumber, byteRow);
@@ -249,14 +249,14 @@ public class HeapFile
 
 	public List<Object> selectAllRows()
 	{
-		return selectWhere(null, INFINITY);
+		return selectWhere(RowPredicate.TRUE_PREDICATE, INFINITY);
 	}
 
 	public List<Object> selectWhere(RowPredicate predicate, int count)
 	{
 		List<Object> result = new ArrayList<Object>();
 		PageId redPointerPageId = localPageId(FIRST_RED_POINTER_PAGE_INDEX);
-		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
+		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		_pageManager.releasePage(redPointerPageId);
 
 		while (redPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
@@ -268,7 +268,7 @@ public class HeapFile
 				return result.subList(0, count);
 
 			redPointerPageId = localPageId(redPointerPage.nextPageIndex());
-			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
+			redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), DiskPage.NOT_BLANK_PAGE);
 			_pageManager.releasePage(redPointerPageId);
 		}
 
@@ -279,7 +279,7 @@ public class HeapFile
 			return result.subList(0, count);
 
 		PageId greenPointerPageId = localPageId(FIRST_GREEN_POINTER_PAGE_INDEX);
-		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		_pageManager.releasePage(greenPointerPageId);
 
 		while (greenPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
@@ -291,7 +291,7 @@ public class HeapFile
 				return result.subList(0, count);
 
 			greenPointerPageId = localPageId(greenPointerPage.nextPageIndex());
-			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 			_pageManager.releasePage(greenPointerPageId);
 		}
 
@@ -318,12 +318,17 @@ public class HeapFile
 		return result;
 	}
 
-	private List<Object> selectAllRowsFromPage(long pageNumber, RowPredicate predicate)
+	public List<Object> selectAllRowsFromPage(long pageNumber, RowPredicate predicate)
+	{
+		PageId pageId = localPageId(pageNumber);
+		RowPage page = new RowPage(_pageManager.getPage(pageId), DiskPage.NOT_BLANK_PAGE, _rowSize);
+		_pageManager.releasePage(pageId);
+		return selectAllRowsFromPage(page, predicate);
+	}
+
+	private List<Object> selectAllRowsFromPage(RowPage page, RowPredicate predicate)
 	{
 		List<Object> result = null;
-		PageId pageId = localPageId(pageNumber);
-		RowPage page = new RowPage(_pageManager.getPage(pageId), false, _rowSize);
-		_pageManager.releasePage(pageId);
 		ArrayList<Integer> rowList = null;
 		if (!page.isEmpty())
 			rowList = page.occupiedRowsList();
@@ -332,8 +337,8 @@ public class HeapFile
 		result = new ArrayList<Object>();
 		for (Integer rowNumber: rowList)
 		{
-			List<Object> rowAsObject = selectRowFromPage(pageNumber, rowNumber);
-			if (predicate != null)
+			List<Object> rowAsObject = selectRowFromPage(page, rowNumber);
+			if (predicate != RowPredicate.TRUE_PREDICATE)
 			{
 				if (predicate.evaluate(rowAsObject))
 					result.add(rowAsObject);
@@ -341,16 +346,12 @@ public class HeapFile
 			else
 				result.add(rowAsObject);
 		}
-
 		return result;
 	}
 
-	private List<Object> selectRowFromPage(long pageNumber, int rowNumber)
+	private List<Object> selectRowFromPage(RowPage page, int rowNumber)
 	{
 		List<Object> result;
-		PageId pageId = localPageId(pageNumber);
-		RowPage page = new RowPage(_pageManager.getPage(pageId), false, _rowSize);
-		_pageManager.releasePage(pageId);
 
 		byte[] rowData = page.getRow(rowNumber);
 		int byteOffset = 0;
@@ -372,7 +373,7 @@ public class HeapFile
 	private void addRedPointer(long pointer)
 	{
 		PageId redPointerPageId = localPageId(getNotFullRedPointerPageIndex());
-		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), false);
+		PointerPage redPointerPage = new PointerPage(_pageManager.getPage(redPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		try
 		{
 			redPointerPage.addPointer(pointer);
@@ -391,7 +392,7 @@ public class HeapFile
 	private void addGreenPointer(long pointer)
 	{
 		PageId greenPointerPageId = localPageId(getNotFullGreenPointerPageIndex());
-		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		try
 		{
 			greenPointerPage.addPointer(pointer);
@@ -405,7 +406,7 @@ public class HeapFile
 	private long getNotEmptyGreenPointerPageIndex()
 	{
 		PageId greenPointerPageId = localPageId(FIRST_GREEN_POINTER_PAGE_INDEX);
-		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		_pageManager.releasePage(greenPointerPageId);
 
 		if (!greenPointerPage.isEmpty())
@@ -414,7 +415,7 @@ public class HeapFile
 		while (greenPointerPage.nextPageIndex() != DiskPage.NULL_PTR)
 		{
 			greenPointerPageId = localPageId(greenPointerPage.nextPageIndex());
-			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), false);
+			greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 			_pageManager.releasePage(greenPointerPageId);
 
 			if (!greenPointerPage.isEmpty())
@@ -434,7 +435,7 @@ public class HeapFile
 	private long getNotFullPointerPageIndexStarting(long starting)
 	{
 		PageId pointerPageId = localPageId(starting);
-		PointerPage pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), false);
+		PointerPage pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), DiskPage.NOT_BLANK_PAGE);
 		_pageManager.releasePage(pointerPageId);
 
 		if (!pointerPage.isFull())
@@ -443,7 +444,7 @@ public class HeapFile
 		while (pointerPage.nextPageIndex() != DiskPage.NULL_PTR)
 		{
 			pointerPageId = localPageId(pointerPage.nextPageIndex());
-			pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), false);
+			pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), DiskPage.NOT_BLANK_PAGE);
 			_pageManager.releasePage(pointerPageId);
 
 			if (!pointerPage.isFull())
@@ -456,10 +457,10 @@ public class HeapFile
 	private long addNewPointerPage(long lastPointerPageIndex)
 	{
 		PageId lastPointerPageId = localPageId(lastPointerPageIndex);
-		PointerPage lastPointerPage = new PointerPage(_pageManager.getPage(lastPointerPageId), false);
+		PointerPage lastPointerPage = new PointerPage(_pageManager.getPage(lastPointerPageId), DiskPage.NOT_BLANK_PAGE);
 
 		PageId newPointerPageId = blankLocalPageId();
-		PointerPage newPointerPage = new PointerPage(_pageManager.createPage(newPointerPageId), true);
+		PointerPage newPointerPage = new PointerPage(_pageManager.createPage(newPointerPageId), DiskPage.BLANK_PAGE);
 		try
 		{
 			lastPointerPage.setNextPageIndex(newPointerPageId.getPageNumber());
@@ -477,7 +478,7 @@ public class HeapFile
 	private void addPointer(long pointerPageIndex, long pointer)
 	{
 		PageId pointerPageId = localPageId(pointerPageIndex);
-		PointerPage pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), false);
+		PointerPage pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), DiskPage.NOT_BLANK_PAGE);
 		try
 		{
 			pointerPage.addPointer(pointer);
@@ -491,7 +492,7 @@ public class HeapFile
 	private void removePointer(long pointerPageIndex, long pointer)
 	{
 		PageId pointerPageId = localPageId(pointerPageIndex);
-		PointerPage pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), false);
+		PointerPage pointerPage = new PointerPage(_pageManager.getPage(pointerPageId), DiskPage.NOT_BLANK_PAGE);
 		try
 		{
 			pointerPage.removePointer(pointer);
@@ -502,6 +503,16 @@ public class HeapFile
 		}
 	}
 
+	public byte[] getLocalPage(long index)
+	{
+		return _pageManager.getPage(localPageId(index));
+	}
+
+	public void releasePage(long index)
+	{
+		_pageManager.releasePage(localPageId(index));
+	}
+
 	private PageId localPageId(long pageIndex) {return new PageId(_filePath, pageIndex);}
 	private PageId blankLocalPageId() {return localPageId(0);}
 
@@ -510,7 +521,7 @@ public class HeapFile
 	private int _rowSize;
 	private static PageManager _pageManager = PageManager.getInstance();
 
-	private static final long FIRST_GREEN_POINTER_PAGE_INDEX = 0;
-	private static final long FIRST_RED_POINTER_PAGE_INDEX = 1;
+	public static final long FIRST_GREEN_POINTER_PAGE_INDEX = 0;
+	public static final long FIRST_RED_POINTER_PAGE_INDEX = 1;
 	private static final int INFINITY = Integer.MAX_VALUE;
 }

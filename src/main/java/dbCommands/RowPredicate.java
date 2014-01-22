@@ -128,6 +128,8 @@ public class RowPredicate
 
     public List<SingleCondition> conditions() { return _conditions; }
 
+	public static final RowPredicate TRUE_PREDICATE = null;
+
     private List<Column> _row_signature;
     private List<SingleCondition> _conditions;
 }

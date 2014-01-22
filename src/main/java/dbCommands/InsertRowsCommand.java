@@ -4,7 +4,7 @@ import dbEnvironment.DbContext;
 import memoryManager.HeapFile;
 import tableTypes.Table;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class InsertRowsCommand implements DbCommand
 {
-    public InsertRowsCommand(String tableName, ArrayList<TableRow> rows)
+    public InsertRowsCommand(String tableName, List<TableRow> rows)
     {
         _tableName = tableName;
         _rows = rows;
@@ -33,5 +33,5 @@ public class InsertRowsCommand implements DbCommand
     }
 
     private String _tableName;
-    private ArrayList<TableRow> _rows;
+    private List<TableRow> _rows;
 }

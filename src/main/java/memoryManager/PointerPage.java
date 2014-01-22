@@ -84,6 +84,8 @@ public class PointerPage extends DiskPage
 
 	public long[] allPointers()
 	{
+		if (isEmpty())
+			return null;
 		long[] result = new long[pointersCount()];
 		int j = 0;
 		int i = -1;

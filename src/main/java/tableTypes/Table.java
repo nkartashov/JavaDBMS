@@ -25,7 +25,7 @@ public class Table {
 
     public Table() {}
 
-    public Table(UUID uid, String name, ArrayList<ColumnTuple> tuples)
+    public Table(UUID uid, String name, List<ColumnTuple> tuples)
     {
         _name = name;
 	    Column columnToAdd;

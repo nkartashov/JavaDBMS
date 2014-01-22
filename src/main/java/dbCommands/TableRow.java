@@ -3,7 +3,6 @@ package dbCommands;
 import org.apache.commons.lang3.ArrayUtils;
 import tableTypes.Column;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,7 +14,7 @@ import java.util.List;
  */
 public class TableRow
 {
-    public TableRow(ArrayList<String> arguments)
+    public TableRow(List<String> arguments)
     {
         _arguments = arguments;
     }
@@ -42,5 +41,5 @@ public class TableRow
 		return result;
 	}
 
-    private ArrayList<String> _arguments;
+    private List<String> _arguments;
 }
