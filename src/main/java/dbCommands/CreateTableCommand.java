@@ -5,7 +5,7 @@ import memoryManager.HeapFile;
 import tableTypes.ColumnTuple;
 import tableTypes.Table;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -16,7 +16,7 @@ import java.util.UUID;
  * To change this template use File | Settings | File Templates.
  */
 public class CreateTableCommand implements DbCommand {
-    public CreateTableCommand(String tableName, ArrayList<ColumnTuple> tuples)
+    public CreateTableCommand(String tableName, List<ColumnTuple> tuples)
     {
         _tableName = tableName;
         _tuples = tuples;
@@ -31,5 +31,5 @@ public class CreateTableCommand implements DbCommand {
     }
 
     private String _tableName;
-    private ArrayList<ColumnTuple> _tuples;
+    private List<ColumnTuple> _tuples;
 }

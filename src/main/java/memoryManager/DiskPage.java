@@ -14,7 +14,10 @@ public class DiskPage {
 	public static final int DATA_OFFSET = 96;
 	public static final long NULL_PTR = -1;
 
-    public DiskPage(byte[] rawPage, boolean blankPage)
+	public static final boolean BLANK_PAGE = true;
+	public static final boolean NOT_BLANK_PAGE = false;
+
+	public DiskPage(byte[] rawPage, boolean blankPage)
     {
 		_rawPage = rawPage;
 	    if (blankPage)

@@ -29,7 +29,7 @@ public class HeapFileTests
 		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
 		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
 		ColumnTuple columnTuple3 = new ColumnTuple("baz", 1, "char");
-		ArrayList<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
+		List<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
 		tuples.add(columnTuple1);
 		tuples.add(columnTuple2);
 		tuples.add(columnTuple3);
@@ -65,7 +65,7 @@ public class HeapFileTests
 	{
 		String tableName = "testTablegfsgdfks";
 		DbContext context = initBasicContext(tableName);
-		SelectCommand selectCommand = new SelectCommand(tableName, null, 100);
+		SelectCommand selectCommand = new SelectCommand(tableName, RowPredicate.TRUE_PREDICATE, 100);
 		selectCommand.executeCommand(context);
 
 		Assert.assertEquals(0, selectCommand.getResult().size());
@@ -77,12 +77,12 @@ public class HeapFileTests
 		String tableName = "testTablegfsgdfks";
 		DbContext context = initBasicContext(tableName);
 
-		ArrayList<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 		args.add("4");
 		args.add("gjghjf");
 		args.add("k");
 		TableRow tableRow = new TableRow(args);
-		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+		List<TableRow> rows = new ArrayList<TableRow>();
 
 		int numberOfRows = 300;
 
@@ -109,12 +109,12 @@ public class HeapFileTests
 		String tableName = "testTableghsadfhjsdffsgdfks";
 		DbContext context = initBasicContext(tableName);
 
-		ArrayList<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 		args.add("4");
 		args.add("gjghjf");
 		args.add("k");
 		TableRow tableRow = new TableRow(args);
-		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+		List<TableRow> rows = new ArrayList<TableRow>();
 
 		final int numberOfRows = 500 * 1000;
 
@@ -142,12 +142,12 @@ public class HeapFileTests
 		String tableName = "testTabsdfgasdflegfsgdfks";
 		DbContext context = initBasicContext(tableName);
 
-		ArrayList<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 		args.add("4");
 		args.add("gjghjf");
 		args.add("k");
 		TableRow tableRow = new TableRow(args);
-		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+		List<TableRow> rows = new ArrayList<TableRow>();
 
 		int numberOfRows = 300;
 
@@ -169,14 +169,14 @@ public class HeapFileTests
 		Table table = context.getTableByName(tableName);
 		List<Column> rowSignature = table.rowSignature();
 
-		ArrayList<Object> expected = new ArrayList<Object>();
+		List<Object> expected = new ArrayList<Object>();
 
 		for (int i = 0; i < args.size(); ++i)
 			expected.add(rowSignature.get(i).type().getAsObject(args.get(i)));
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{
-			ArrayList<Object> actual = (ArrayList<Object>) result.get(i);
+			List<Object> actual = (List<Object>) result.get(i);
 			for (int j = 0; j < actual.size(); ++j)
 				Assert.assertEquals(expected.get(j), actual.get(j));
 		}
@@ -190,12 +190,12 @@ public class HeapFileTests
 		String tableName = "testTabsdfgfasdflhsgdfkahsdlkfgasljdgfasdflegfsgdfks";
 		DbContext context = initBasicContext(tableName);
 
-		ArrayList<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 		args.add("4");
 		args.add("gjghjf");
 		args.add("k");
 		TableRow tableRow = new TableRow(args);
-		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+		List<TableRow> rows = new ArrayList<TableRow>();
 
 		int numberOfRows = 300;
 
@@ -217,14 +217,14 @@ public class HeapFileTests
 		Table table = context.getTableByName(tableName);
 		List<Column> rowSignature = table.rowSignature();
 
-		ArrayList<Object> expected = new ArrayList<Object>();
+		List<Object> expected = new ArrayList<Object>();
 
 		for (int i = 0; i < args.size(); ++i)
 			expected.add(rowSignature.get(i).type().getAsObject(args.get(i)));
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{
-			ArrayList<Object> actual = (ArrayList<Object>) result.get(i);
+			List<Object> actual = (List<Object>) result.get(i);
 			for (int j = 0; j < actual.size(); ++j)
 				Assert.assertEquals(expected.get(j), actual.get(j));
 		}
@@ -238,12 +238,12 @@ public class HeapFileTests
 		String tableName = "testTabsdasbflaksdbfklfgasdflegfsgdfks";
 		DbContext context = initBasicContext(tableName);
 
-		ArrayList<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 		args.add("4");
 		args.add("gjghjf");
 		args.add("k");
 		TableRow tableRow = new TableRow(args);
-		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+		List<TableRow> rows = new ArrayList<TableRow>();
 
 		int numberOfRows = 1000;
 
@@ -256,11 +256,11 @@ public class HeapFileTests
 
 		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
 		insertRowsCommand.executeCommand(context);
-		SelectCommand selectRowsCommand = new SelectCommand(tableName, null, expectedRowCount);
+		SelectCommand selectRowsCommand = new SelectCommand(tableName, RowPredicate.TRUE_PREDICATE, expectedRowCount);
 		selectRowsCommand.executeCommand(context);
 		List<Object> result = selectRowsCommand.getResult();
 
-		Assert.assertNotEquals(null, result);
+		Assert.assertNotEquals(RowPredicate.TRUE_PREDICATE, result);
 
 		Assert.assertEquals(expectedRowCount, result.size());
 
@@ -273,12 +273,12 @@ public class HeapFileTests
 		String tableName = "testTabsdfgasdjfkahsdfflegfsgdfks";
 		DbContext context = initBasicContext(tableName);
 
-		ArrayList<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 		args.add("4");
 		args.add("gjghjf");
 		args.add("k");
 		TableRow tableRow = new TableRow(args);
-		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+		List<TableRow> rows = new ArrayList<TableRow>();
 
 		int numberOfRows = 300;
 
@@ -290,7 +290,7 @@ public class HeapFileTests
 		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
 		insertRowsCommand.executeCommand(context);
 
-		ArrayList<String> newArgs = new ArrayList<String>();
+		List<String> newArgs = new ArrayList<String>();
 
 		newArgs.add("5");
 		newArgs.add("kekeke");
@@ -298,12 +298,12 @@ public class HeapFileTests
 
 		TableRow newRow = new TableRow(newArgs);
 
-		UpdateCommand updateCommand = new UpdateCommand(tableName, null, newRow);
+		UpdateCommand updateCommand = new UpdateCommand(tableName, RowPredicate.TRUE_PREDICATE, newRow);
 		updateCommand.executeCommand(context);
 
 		int expectedRowCount = 200;
 
-		SelectCommand selectRowsCommand = new SelectCommand(tableName, null, expectedRowCount);
+		SelectCommand selectRowsCommand = new SelectCommand(tableName, RowPredicate.TRUE_PREDICATE, expectedRowCount);
 		selectRowsCommand.executeCommand(context);
 		List<Object> result = selectRowsCommand.getResult();
 
@@ -321,7 +321,7 @@ public class HeapFileTests
 
 		for (int i = 0; i < expectedRowCount; ++i)
 		{
-			List<Object> actual = (ArrayList<Object>) result.get(i);
+			List<Object> actual = (List<Object>) result.get(i);
 			for (int j = 0; j < actual.size(); ++j)
 				Assert.assertEquals(expected.get(j), actual.get(j));
 		}
@@ -335,12 +335,12 @@ public class HeapFileTests
 		String tableName = "testTabljkglkfagdfasdhfegfsgdfks";
 		DbContext context = initBasicContext(tableName);
 
-		ArrayList<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 		args.add("4");
 		args.add("gjghjf");
 		args.add("k");
 		TableRow tableRow = new TableRow(args);
-		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+		List<TableRow> rows = new ArrayList<TableRow>();
 
 		int numberOfRows = 300;
 
@@ -358,10 +358,10 @@ public class HeapFileTests
 
 		Assert.assertEquals(numberOfRows, result.size());
 
-		DeleteCommand deleteCommand = new DeleteCommand(tableName, null);
+		DeleteCommand deleteCommand = new DeleteCommand(tableName, RowPredicate.TRUE_PREDICATE);
 		deleteCommand.executeCommand(context);
 
-		SelectCommand selectCommand = new SelectCommand(tableName, null, numberOfRows);
+		SelectCommand selectCommand = new SelectCommand(tableName, RowPredicate.TRUE_PREDICATE, numberOfRows);
 		selectCommand.executeCommand(context);
 
 		Assert.assertEquals(0, selectCommand.getResult().size());
@@ -375,17 +375,17 @@ public class HeapFileTests
 		String tableName = "sasai";
 		DbContext context = initBasicContext(tableName);
 
-		ArrayList<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 		args.add("4");
 		args.add("gjghjf");
 		args.add("k");
 		TableRow tableRow = new TableRow(args);
-		ArrayList<String> args1 = new ArrayList<String>();
+		List<String> args1 = new ArrayList<String>();
 		args1.add("5");
 		args1.add("gjghjf");
 		args1.add("q");
 		TableRow tableRow1 = new TableRow(args1);
-		ArrayList<TableRow> rows = new ArrayList<TableRow>();
+		List<TableRow> rows = new ArrayList<TableRow>();
 
 		int numberOfRows = 300;
 
@@ -398,7 +398,7 @@ public class HeapFileTests
 		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
 		insertRowsCommand.executeCommand(context);
 
-		SelectCommand selectCommand = new SelectCommand(tableName, null, numberOfRows * 2);
+		SelectCommand selectCommand = new SelectCommand(tableName, RowPredicate.TRUE_PREDICATE, numberOfRows * 2);
 		selectCommand.executeCommand(context);
 
 		Assert.assertEquals(numberOfRows * 2, selectCommand.getResult().size());
