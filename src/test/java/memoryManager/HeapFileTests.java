@@ -116,7 +116,7 @@ public class HeapFileTests
 		TableRow tableRow = new TableRow(args);
 		ArrayList<TableRow> rows = new ArrayList<TableRow>();
 
-		final int numberOfRows = 750 * 1000;
+		final int numberOfRows = 500 * 1000;
 
 		for (int i = 0; i < numberOfRows; ++i)
 		{

@@ -22,8 +22,7 @@ public class SQLParser {
             String secondWord = query.split(" ", 3)[1].toUpperCase();
             if (secondWord.equals("TABLE")) {
                 if (Checkers.CheckCreateTable(query)) {
-                    DbCommand ctCommand = parseCreateTable(query);
-                    return ctCommand;
+	                return parseCreateTable(query);
                 }
                 else {
                     System.out.println("Error: incorrect syntax");
@@ -35,15 +34,13 @@ public class SQLParser {
             String secondWord = query.split(" ", 3)[1].toUpperCase();
             if (secondWord.equals("INTO")) {
                 if (Checkers.CheckInsertInto(query)) {
-                    DbCommand iiCommand = parseInsertInto(query);
-                    return iiCommand;
+	                return parseInsertInto(query);
                 }
             }
         }
         if (firstWord.equals("SELECT")) {
             if (Checkers.CheckSelect(query)) {
-                DbCommand selectCommand = parseSelect(query);
-                return selectCommand;
+	            return parseSelect(query);
             }
         }
         return null;
@@ -66,9 +63,8 @@ public class SQLParser {
                 parsedColumns.add(new ColumnTuple(forNameAndType[0], 0, forNameAndType[1]));
         }
         tableParams.add(parsedColumns);
-        DbCommand ctc = new CreateTableCommand(tableParams.get(0).toString(), (ArrayList<ColumnTuple>)tableParams.get(1));
-        //System.out.println(tableParams);
-        return ctc;
+	    //System.out.println(tableParams);
+        return new CreateTableCommand(tableParams.get(0).toString(), (ArrayList<ColumnTuple>)tableParams.get(1));
     }
 
     private DbCommand parseInsertInto(String query) {
@@ -89,7 +85,7 @@ public class SQLParser {
         return null;
     }
 
-    private DbCommand parseSelect(String query) {
+    private DbResultCommand parseSelect(String query) {
         // !!! assuming that only SELECT * can be used !!!
         String table_name = query.split(" ", 5)[TABLE_NAME_POSITION].trim();
         RowPredicate predicate = null;
@@ -109,9 +105,10 @@ public class SQLParser {
         if(_error_occured) {
             return null;
         }
-        for(int i = 0; i < conditions.size(); ++i) {
-            namesToColumnNumbers(table_name, conditions.get(i));
-        }
+	    for (SingleCondition condition : conditions)
+	    {
+		    namesToColumnNumbers(table_name, condition);
+	    }
         List<Column> row_signature = _context.getTableByName(table_name).rowSignature();
         return new RowPredicate(row_signature, conditions);
     }
@@ -133,13 +130,13 @@ public class SQLParser {
 
     private String findCompOperator(String query) {
         String operator;
-        if (query.indexOf("<") != -1) {
+        if (query.contains("<")) {
             operator = "<";
         }
-        else if (query.indexOf(">") != -1) {
+        else if (query.contains(">")) {
             operator = ">";
         }
-        else if (query.indexOf("=") != -1) {
+        else if (query.contains("=")) {
             operator = "=";
         }
         else return null;

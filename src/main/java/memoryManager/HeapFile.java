@@ -36,7 +36,7 @@ public class HeapFile
 		_pageManager.updateAndReleasePage(firstGreenPageId, greenPointerPage);
 
 
-		PageId firstRedPageId = new PageId(filePath, FIRST_GREEN_POINTER_PAGE_INDEX);
+		PageId firstRedPageId = new PageId(filePath, FIRST_RED_POINTER_PAGE_INDEX);
 		byte[] redPointerPage = _pageManager.createPage(firstRedPageId);
 		PointerPage.initHeader(redPointerPage);
 		_pageManager.updateAndReleasePage(firstRedPageId, redPointerPage);
