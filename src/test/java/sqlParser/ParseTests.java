@@ -57,8 +57,8 @@ public class ParseTests {
         String tableName = CreateTestTable(context);
         String query = "SELECT * FROM " + tableName;
 
-        SQLParser parser = new SQLParser(query, context);
-        SelectAllRowsCommand command = (SelectAllRowsCommand) parser.parse();
+        SQLParser parser = new SQLParser(context);
+        SelectAllRowsCommand command = (SelectAllRowsCommand) parser.parse(query);
         Assert.assertEquals(tableName, command.tableName());
 
         context.close();
@@ -70,8 +70,8 @@ public class ParseTests {
         String tableName = CreateTestTable(context);
         String query = "SELECT * FROM " + tableName + " WHERE column1 > 3 AND col3 <> \"ccc5\"";
 
-        SQLParser parser = new SQLParser(query, context);
-        SelectCommand command = (SelectCommand) parser.parse();
+        SQLParser parser = new SQLParser(context);
+        SelectCommand command = (SelectCommand) parser.parse(query);
         RowPredicate predicate = command.predicate();
         List<SingleCondition> conditions = predicate.conditions();
 

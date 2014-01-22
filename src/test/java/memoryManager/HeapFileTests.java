@@ -405,12 +405,12 @@ public class HeapFileTests
 
 		String query = "SELECT * FROM " + tableName + " WHERE lol == 5 AND baz <> \"q\"";
 
-		SQLParser parser = new SQLParser(query, context);
+		SQLParser parser = new SQLParser(context);
 
-		SelectCommand selectCommand2 = (SelectCommand) parser.parse();
+		SelectCommand selectCommand2 = (SelectCommand) parser.parse(query);
 		selectCommand2.executeCommand(context);
 
-		Assert.assertEquals(numberOfRows, selectCommand.getResult().size());
+		Assert.assertEquals(numberOfRows, selectCommand2.getResult().size());
 	}
 
 	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";
