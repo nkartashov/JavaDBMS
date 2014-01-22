@@ -31,8 +31,8 @@ public class TableEntryPtr {
         return ArrayUtils.addAll(ByteConverter.longToByte(_page_pointer), ByteConverter.intToByte(_row_pointer));
     }
 
-    public long getPagePointer () { return  _page_pointer; }
-    public int getRowPointer () { return _row_pointer; }
+    public long pagePointer () { return  _page_pointer; }
+    public int rowPointer () { return _row_pointer; }
 
     public boolean _is_null;
 
