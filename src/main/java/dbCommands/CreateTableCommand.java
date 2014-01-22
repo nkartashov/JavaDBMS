@@ -27,7 +27,7 @@ public class CreateTableCommand implements DbCommand {
         Table tableToAdd = new Table(UUID.randomUUID(), _tableName, _tuples);
         context.tables().put(_tableName, tableToAdd);
 
-	    HeapFile.seedDataFile(context.getLocation()  + tableToAdd.getRelativeDataPath());
+	    HeapFile.seedDataFile(context.getLocation() + tableToAdd.getRelativeDataPath());
     }
 
     private String _tableName;

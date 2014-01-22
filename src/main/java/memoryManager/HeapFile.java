@@ -36,7 +36,7 @@ public class HeapFile
 		_pageManager.updateAndReleasePage(firstGreenPageId, greenPointerPage);
 
 
-		PageId firstRedPageId = new PageId(filePath, FIRST_GREEN_POINTER_PAGE_INDEX);
+		PageId firstRedPageId = new PageId(filePath, FIRST_RED_POINTER_PAGE_INDEX);
 		byte[] redPointerPage = _pageManager.createPage(firstRedPageId);
 		PointerPage.initHeader(redPointerPage);
 		_pageManager.updateAndReleasePage(firstRedPageId, redPointerPage);
@@ -275,7 +275,7 @@ public class HeapFile
 		if (!redPointerPage.isEmpty())
 			result.addAll(selectFromAllPointers(redPointerPage.allPointers(), predicate));
 
-		if (result.size() >= count)
+		if (count != -1 && result.size() >= count)
 			return result.subList(0, count);
 
 		PageId greenPointerPageId = localPageId(FIRST_GREEN_POINTER_PAGE_INDEX);
@@ -298,7 +298,7 @@ public class HeapFile
 		if (!greenPointerPage.isEmpty())
 			result.addAll(selectFromAllPointers(greenPointerPage.allPointers(), predicate));
 
-		if (result.size() >= count)
+		if (count != -1 && result.size() >= count)
 			return result.subList(0, count);
 
 		return result;

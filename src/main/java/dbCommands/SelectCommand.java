@@ -13,7 +13,7 @@ import java.util.List;
  * Time: 20:56
  * To change this template use File | Settings | File Templates.
  */
-public class SelectCommand implements DbCommand, DbResultCommand
+public class SelectCommand implements DbResultCommand
 {
 	public SelectCommand(String tableName, RowPredicate predicate, int count)
 	{

@@ -15,7 +15,7 @@ import java.util.List;
  * Time: 14:34
  * To change this template use File | Settings | File Templates.
  */
-public class SelectAllRowsCommand implements DbCommand, DbResultCommand
+public class SelectAllRowsCommand implements DbResultCommand
 {
 	public SelectAllRowsCommand(String tableName)
 	{

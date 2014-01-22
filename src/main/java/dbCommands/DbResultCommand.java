@@ -9,7 +9,7 @@ import java.util.List;
  * Time: 15:19
  * To change this template use File | Settings | File Templates.
  */
-public interface DbResultCommand
+public interface DbResultCommand extends DbCommand
 {
 	public List<Object> getResult();
 }
