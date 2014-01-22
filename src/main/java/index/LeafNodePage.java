@@ -41,11 +41,13 @@ public class LeafNodePage extends NodePage {
             _valid_keys.clear(key_pos);
             _num_of_valid_keys -= 1;
             dumpChanges();
+
+            byte[] raw_pointer = getEntryPtr(key_pos);
+            TableEntryPtr pointer_to_deleted_entry = new TableEntryPtr();
+            pointer_to_deleted_entry.setPointer(raw_pointer);
+            return pointer_to_deleted_entry;
         }
-        byte[] raw_pointer = getEntryPtr(key_pos);
-        TableEntryPtr pointer_to_deleted_entry = new TableEntryPtr();
-        pointer_to_deleted_entry.setPointer(raw_pointer);
-        return pointer_to_deleted_entry;
+        return new TableEntryPtr();
     }
 
     public void insertNotFull(int key, TableEntryPtr pointer) {
