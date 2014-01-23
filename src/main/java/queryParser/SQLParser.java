@@ -29,6 +29,9 @@ public class SQLParser {
                     return null;
                 }
             }
+            if(secondWord.equals("INDEX")) {
+                return parseCreateIndex(query.split("INDEX", 2)[1].trim());
+            }
         }
         if (firstWord.equals("INSERT")) {
             String secondWord = query.split(" ", 3)[1].toUpperCase();
@@ -67,6 +70,12 @@ public class SQLParser {
             parsedColumns.add(new ColumnTuple(columnName, size, type));
         }
         return new CreateTableCommand(name, parsedColumns);
+    }
+
+    private DbCommand parseCreateIndex(String query) {
+        String indexName = query.split(" ", 2)[0].trim();
+        String restPart = query.split(" ", 2)[1].trim();
+        return null;
     }
 
     private DbCommand parseInsertInto(String query) {

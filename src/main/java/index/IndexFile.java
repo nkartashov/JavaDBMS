@@ -5,6 +5,7 @@ import dbEnvironment.DbContext;
 import memoryManager.PageId;
 import memoryManager.PageManager;
 import memoryManager.TableIterator;
+import queryParser.SingleCondition;
 import utils.ByteConverter;
 
 import java.util.ArrayList;
@@ -44,9 +45,15 @@ public class IndexFile {
         }
     }
 
-    public List<TableEntryPtr> select(RowPredicate predicate) {
-        //if predicate is simple and contains "=" condition
-        return tryFindEntries(Integer.getInteger(predicate.conditions().get(0)._val2));
+    public List<TableEntryPtr> select(SingleCondition condition) {
+        //if condition is "="
+        if(!condition._val1.contains("{")) {
+            return tryFindEntries(Integer.valueOf(condition._val1));
+        }
+        else if(!condition._val2.contains("{")) {
+            return tryFindEntries(Integer.valueOf(condition._val2));
+        }
+        return new ArrayList<TableEntryPtr>();
     }
 
     public List<TableEntryPtr> tryFindEntries(int key) {
