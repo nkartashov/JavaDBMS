@@ -60,7 +60,7 @@ public class DbContext {
 		_closed = true;
 	}
 
-	public void open()
+	private void open()
 	{
 		File tablePath = new File(_location + "tables/");
 		String tableHeader;

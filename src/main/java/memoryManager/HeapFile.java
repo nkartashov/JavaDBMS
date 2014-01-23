@@ -366,6 +366,14 @@ public class HeapFile
 		return result;
 	}
 
+	public List<Object> selectRowFromPage(long pageNumber, int rowNumber)
+	{
+		PageId pageId = localPageId(pageNumber);
+		RowPage page = new RowPage(_pageManager.getPage(pageId), DiskPage.NOT_BLANK_PAGE, _rowSize);
+		_pageManager.releasePage(pageId);
+		return selectRowFromPage(page, rowNumber);
+	}
+
 	public List<Object> selectRowFromPage(RowPage page, int rowNumber)
 	{
 		List<Object> result;

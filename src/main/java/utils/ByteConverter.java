@@ -45,7 +45,7 @@ public class ByteConverter
 		result[0] = (byte) bytes.length;
 		assert bytes.length <= Byte.MAX_VALUE;
 		return ArrayUtils.addAll(ArrayUtils.addAll(result, bytes),
-			new byte[length - item.length() - 1]);
+			new byte[Math.max(0, length - item.length() - 1)]);
 	}
 
 	public static int LONG_LENGTH_IN_BYTES = 8;

@@ -33,7 +33,6 @@ public class Table {
         {
 	        columnToAdd = new Column(tuple);
             _columns.add(columnToAdd);
-	        _rowSize += columnToAdd.size();
         }
         _uid = uid;
 
@@ -56,12 +55,12 @@ public class Table {
         Pattern metadataPattern = Pattern.compile("<meta>(.*?)</meta>");
         Matcher metadataMatcher = metadataPattern.matcher(text);
         metadataMatcher.find();
-        this.DeserializeMetadata(metadataMatcher.group(1));
+        DeserializeMetadata(metadataMatcher.group(1));
 
         Pattern columnsPattern = Pattern.compile("<columns>(.*?)</columns>");
         Matcher columnsMatcher = columnsPattern.matcher(text);
         columnsMatcher.find();
-        this.DeserializeColumns(columnsMatcher.group(1));
+        DeserializeColumns(columnsMatcher.group(1));
 
         _dataFileName = _uid + "_data";
     }
@@ -100,8 +99,6 @@ public class Table {
     public void deleteRows(int rows) {_numberOfRows -= rows;}
 
 	public int numberOfRows() {return _numberOfRows;}
-
-	public int rowSize() {return _rowSize;}
 
 	public List<Column> rowSignature() {return _columns;}
 
@@ -154,11 +151,10 @@ public class Table {
         Pattern numberPattern = Pattern.compile("<numRows>(.*?)</numRows>");
         Matcher numberMatcher = numberPattern.matcher(text);
         numberMatcher.find();
-        _name = numberMatcher.group(1);
+        _numberOfRows = Integer.parseInt(numberMatcher.group(1));
     }
 
     private List<Column> _columns = new ArrayList<Column>();
-	private int _rowSize = 0;
     private String _name;
     private UUID _uid;
     private int _numberOfRows = 0;
