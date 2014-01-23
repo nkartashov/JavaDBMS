@@ -74,8 +74,10 @@ public class SQLParser {
 
     private DbCommand parseCreateIndex(String query) {
         String indexName = query.split(" ", 2)[0].trim();
-        String restPart = query.split(" ", 2)[1].trim();
-        return null;
+        String restPart = query.split(" ", 2)[1].replace("ON | on", "").trim();
+        String tableName = restPart.split("\\(", 2)[0].trim();
+        String columnName = restPart.split("\\(", 2)[1].replace(")", "").trim();
+        return new CreateIndexCommand(tableName, nameToColumnNo(tableName, columnName));
     }
 
     private DbCommand parseInsertInto(String query) {
@@ -171,6 +173,16 @@ public class SQLParser {
                 }
             }
         }
+    }
+
+    private int nameToColumnNo(String tableName, String columnName) {
+        List<Column> columns = _context.getTableByName(tableName).rowSignature();
+        for (int i = 0; i < columns.size(); ++i) {
+            if (columns.get(i).name().equals(columnName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private DbContext _context;
