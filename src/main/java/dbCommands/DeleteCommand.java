@@ -26,7 +26,8 @@ public class DeleteCommand implements DbCommand
 		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
 			tableToSelectFrom.rowSignature());
 
-		tableHeapFile.deleteRows(_predicate);
+		int numberOfDeletions = tableHeapFile.deleteRows(_predicate);
+		tableToSelectFrom.deleteRows(numberOfDeletions);
 	}
 
 	private String _tableName;

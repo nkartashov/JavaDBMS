@@ -24,7 +24,6 @@ public class SelectAllRowsCommand implements DbResultCommand
 
 	public void executeCommand(DbContext context)
 	{
-		_hasBeenExecuted = true;
 		Table tableToSelectFrom = context.getTableByName(_tableName);
 
 		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
@@ -35,14 +34,11 @@ public class SelectAllRowsCommand implements DbResultCommand
 
 	public List<Object> getResult()
 	{
-		if (!_hasBeenExecuted)
-			return null;
 		return _result;
 	}
 
     public String tableName() { return _tableName; }
 
-	private boolean _hasBeenExecuted = false;
 	private String _tableName;
 	private List<Object> _result;
 

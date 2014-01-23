@@ -24,7 +24,6 @@ public class SelectCommand implements DbResultCommand
 
 	public void executeCommand(DbContext context)
 	{
-		_hasBeenExecuted = true;
 		Table tableToSelectFrom = context.getTableByName(_tableName);
 
 		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
@@ -35,16 +34,13 @@ public class SelectCommand implements DbResultCommand
 
 	public List<Object> getResult()
 	{
-		if (!_hasBeenExecuted)
-			return null;
 		return _result;
 	}
 
     public RowPredicate predicate() { return _predicate; }
 
-	private boolean _hasBeenExecuted = false;
 	private String _tableName;
 	private RowPredicate _predicate = null;
 	private int _count = Integer.MAX_VALUE;
-	private List<Object> _result;
+	private List<Object> _result = null;
 }

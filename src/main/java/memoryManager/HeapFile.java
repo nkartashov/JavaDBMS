@@ -44,8 +44,9 @@ public class HeapFile
 		_pageManager.updateAndReleasePage(firstRedPageId, redPointerPage);
 	}
 
-	public void deleteRows(RowPredicate predicate)
+	public int deleteRows(RowPredicate predicate)
 	{
+		numberOfDeletions = 0;
 		PageId greenPointerPageId = localPageId(FIRST_GREEN_POINTER_PAGE_INDEX);
 		PointerPage greenPointerPage = new PointerPage(_pageManager.getPage(greenPointerPageId), DiskPage.NOT_BLANK_PAGE);
 		_pageManager.releasePage(greenPointerPageId);
@@ -93,6 +94,8 @@ public class HeapFile
 				addGreenPointer(pointer);
 			}
 		}
+
+		return numberOfDeletions;
 	}
 
 	private List<Long> deleteAllPointers(long[] allPointers, RowPredicate predicate, boolean redPage)
@@ -100,16 +103,19 @@ public class HeapFile
 		List<Long> result = new ArrayList<Long>();
 		for (long pageNumber: allPointers)
 		{
-			boolean deletionsHappened = deleteAllRowsFromPage(pageNumber, predicate);
-			if (redPage && deletionsHappened)
+			int deletionsHappened = deleteAllRowsFromPage(pageNumber, predicate);
+			if (redPage && deletionsHappened > 0)
+			{
+				numberOfDeletions += deletionsHappened;
 				result.add(pageNumber);
+			}
 		}
 		return result;
 	}
 
-	private boolean deleteAllRowsFromPage(long pageNumber, RowPredicate predicate)
+	private int deleteAllRowsFromPage(long pageNumber, RowPredicate predicate)
 	{
-		boolean deletionsHappened = DiskPage.NOT_BLANK_PAGE;
+		int numberOfDeletions = 0;
 		PageId pageId = localPageId(pageNumber);
 		RowPage page = new RowPage(_pageManager.getPage(pageId), DiskPage.NOT_BLANK_PAGE, _rowSize);
 		try
@@ -118,7 +124,7 @@ public class HeapFile
 			if (!page.isEmpty())
 				rowList = page.occupiedRowsList();
 			if (rowList == null)
-				return deletionsHappened;
+				return numberOfDeletions;
 			for (Integer rowNumber: rowList)
 			{
 				List<Object> rowAsObject = selectRowFromPage(page, rowNumber);
@@ -127,13 +133,13 @@ public class HeapFile
 					if (predicate.evaluate(rowAsObject))
 					{
 						page.deleteRow(rowNumber);
-						deletionsHappened = true;
+						++numberOfDeletions;
 					}
 				}
 				else
 				{
 					page.deleteRow(rowNumber);
-					deletionsHappened = true;
+					++numberOfDeletions;
 				}
 			}
 		}
@@ -141,7 +147,7 @@ public class HeapFile
 		{
 			_pageManager.updateAndReleasePage(pageId, page.rawPage());
 		}
-		return deletionsHappened;
+		return numberOfDeletions;
 	}
 
 	public void insertRow(TableRow row)
@@ -523,6 +529,8 @@ public class HeapFile
 	{
 		_pageManager.releasePage(localPageId(index));
 	}
+
+	private int numberOfDeletions = 0;
 
 	public PageId localPageId(long pageIndex) {return new PageId(_filePath, pageIndex);}
 	private PageId blankLocalPageId() {return localPageId(0);}
