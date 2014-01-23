@@ -6,6 +6,7 @@ import index.TableEntryPtr;
 import memoryManager.HeapFile;
 import tableTypes.Table;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,16 +31,16 @@ public class SelectCommand implements DbResultCommand
         HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
                 tableToSelectFrom.rowSignature());
 
-        //check if index exists
-        //if not exists
-
-		_result = tableHeapFile.selectWhere(_predicate, _count);
-
-        //else
-        IndexFile index = new IndexFile(null, false);
-        List<TableEntryPtr> entry_ptrs = index.select(_predicate);
-        for(TableEntryPtr ptr : entry_ptrs) {
-//            tableHeapFile.selectRowFromPage()
+        if(true) {
+            _result = tableHeapFile.selectWhere(_predicate, _count);
+        }
+        else {
+            IndexFile index = new IndexFile(null, false);
+            List<TableEntryPtr> entry_ptrs = index.select(_predicate);
+            _result = new ArrayList<Object>();
+            for(TableEntryPtr ptr : entry_ptrs) {
+                _result.add(tableHeapFile.selectRowFromPage(ptr.pagePointer(), ptr.rowPointer()));
+            }
         }
 	}
 
