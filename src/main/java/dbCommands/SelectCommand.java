@@ -1,9 +1,12 @@
 package dbCommands;
 
 import dbEnvironment.DbContext;
+import index.IndexFile;
+import index.TableEntryPtr;
 import memoryManager.HeapFile;
 import tableTypes.Table;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,11 +28,20 @@ public class SelectCommand implements DbResultCommand
 	public void executeCommand(DbContext context)
 	{
 		Table tableToSelectFrom = context.getTableByName(_tableName);
+        HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
+                tableToSelectFrom.rowSignature());
 
-		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
-			tableToSelectFrom.rowSignature());
-
-		_result = tableHeapFile.selectWhere(_predicate, _count);
+        if(true) {
+            _result = tableHeapFile.selectWhere(_predicate, _count);
+        }
+        else {
+            IndexFile index = new IndexFile(null, false);
+            List<TableEntryPtr> entry_ptrs = index.select(_predicate);
+            _result = new ArrayList<Object>();
+            for(TableEntryPtr ptr : entry_ptrs) {
+                _result.add(tableHeapFile.selectRowFromPage(ptr.pagePointer(), ptr.rowPointer()));
+            }
+        }
 	}
 
 	public List<Object> getResult()
