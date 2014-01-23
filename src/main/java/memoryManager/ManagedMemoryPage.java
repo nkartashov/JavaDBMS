@@ -23,7 +23,10 @@ public class ManagedMemoryPage
 		_hasBeenChanged = true;
 		System.arraycopy(data, 0, _rawData, 0, DiskPage.MAX_PAGE_SIZE);
 	}
+
 	public int references() {return _references;}
+
+	public boolean fullyReleased() {return _references == 0;}
 
 	public boolean hasBeenChanged() {return _hasBeenChanged;}
 

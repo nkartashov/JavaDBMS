@@ -4,8 +4,10 @@ import utils.Logger;
 
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -42,6 +44,8 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
 			ManagedMemoryPage page = new ManagedMemoryPage(newRawPage);
 			page.get();
 			put(pageId, page);
+			if (_releasedPages.contains(pageId))
+				_releasedPages.remove(pageId);
 			return newRawPage;
 		}
 		catch (FileNotFoundException e)
@@ -65,6 +69,8 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
 	        page = get(pageId);
         }
 	    page.get();
+	    if (_releasedPages.contains(pageId))
+		    _releasedPages.remove(pageId);
         return page.data();
     }
 
@@ -100,13 +106,19 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
 	{
 		ManagedMemoryPage page = get(pageId);
 		page.release();
+		if (page.fullyReleased())
+			_releasedPages.add(pageId);
 		put(pageId, page);
 	}
 
 	public void updateAndReleasePage(PageId pageId, byte[] rawPage)
 	{
 		ManagedMemoryPage page = get(pageId);
+		if (page == null)
+			System.out.print("lol");
 		page.setData(rawPage);
+		if (page.fullyReleased())
+			_releasedPages.add(pageId);
 		page.release();
 		put(pageId, page);
 	}
@@ -157,6 +169,19 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
     {
         if (super.size() > MAX_PAGES)
         {
+	        if (!entry.getValue().fullyReleased())
+	        {
+		        if (!_releasedPages.isEmpty())
+		        {
+			        PageId releasedPageId = _releasedPages.iterator().next();
+			        dumpPage(releasedPageId, get(releasedPageId).data());
+			        remove(releasedPageId);
+			        _releasedPages.remove(releasedPageId);
+			        return false;
+		        }
+	        }
+	        if (_releasedPages.contains(entry.getKey()))
+		        _releasedPages.remove(entry.getKey());
 	        dumpPage(entry);
             return true;
         }
@@ -165,5 +190,6 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
 
 	public static final int MAX_PAGES = 10;
 
+	private Set<PageId> _releasedPages = new HashSet<PageId>();
     private static PageManager _instance = new PageManager();
 }
