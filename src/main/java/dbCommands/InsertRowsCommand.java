@@ -30,6 +30,8 @@ public class InsertRowsCommand implements DbCommand
 
 	    for (TableRow row: _rows)
 	        tableHeapFile.insertRow(row);
+
+	    tableToInsertInto.insertRows(_rows.size());
     }
 
     private String _tableName;

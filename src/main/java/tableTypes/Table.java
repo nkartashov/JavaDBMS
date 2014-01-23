@@ -89,11 +89,7 @@ public class Table {
         }
     }
 
-    public UUID getUid() {return _uid;}
-
     public String getName() {return _name;}
-
-    public String getDataFileName() {return _dataFileName;}
 
 	public String getRelativeTablePath() {return "tables/" + _uid.toString();}
 
@@ -102,6 +98,8 @@ public class Table {
     public void insertRows(int rows) {_numberOfRows += rows;}
 
     public void deleteRows(int rows) {_numberOfRows -= rows;}
+
+	public int numberOfRows() {return _numberOfRows;}
 
 	public int rowSize() {return _rowSize;}
 

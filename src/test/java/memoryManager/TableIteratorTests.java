@@ -124,14 +124,13 @@ public class TableIteratorTests
 
 		PageId pageId = heapFile.localPageId(tableEntryPtr.pagePointer());
 		RowPage page = new RowPage(manager.getPage(pageId), DiskPage.NOT_BLANK_PAGE, heapFile.rowSize());
-
+		manager.releasePage(pageId);
 		List<Object> actual = heapFile.selectRowFromPage(page, tableEntryPtr.rowPointer());
 
 		for (int i = 0; i < expected.size(); ++i)
 		{
 			Assert.assertEquals(expected.get(i), actual.get(i));
 		}
-
 
 		context.close();
 	}

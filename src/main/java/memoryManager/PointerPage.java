@@ -41,8 +41,7 @@ public class PointerPage extends DiskPage
 		if (index > MAX_POINTERS_COUNT)
 			throw new IndexOutOfBoundsException("Cannot set pointer with " + index + ": index is out of range");
 		byte[] newValues = ByteConverter.longToByte(pointer);
-		System.arraycopy(newValues, 0, _rawPage,
-			DATA_OFFSET + index * ByteConverter.LONG_LENGTH_IN_BYTES, ByteConverter.LONG_LENGTH_IN_BYTES);
+		writeData(index * ByteConverter.LONG_LENGTH_IN_BYTES, newValues, 0, newValues.length);
 	}
 
 	public void addPointer(long pointer)
