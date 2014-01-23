@@ -1,8 +1,10 @@
 package index;
 
+import dbCommands.RowPredicate;
 import dbEnvironment.DbContext;
 import memoryManager.PageId;
 import memoryManager.PageManager;
+import memoryManager.TableIterator;
 import utils.ByteConverter;
 
 import java.util.ArrayList;
@@ -34,12 +36,17 @@ public class IndexFile {
     }
 
     public void createIndex(String table_name, int field_no, DbContext context) {
-//        TableIterator iter = new TableIterator(context, table_name);
-//        while(!iter.isFinished()) {
-//            List<Object> entry = iter.nextRow();
-//            TableEntryPtr entry_ptr = iter.tableEntryPtr();
-//            insertEntry((Integer) entry.get(field_no), entry_ptr);
-//        }
+        TableIterator iter = new TableIterator(context, table_name);
+        while(!iter.isFinished()) {
+            List<Object> entry = iter.nextRow();
+            TableEntryPtr entry_ptr = iter.tableEntryPtr();
+            insertEntry((Integer) entry.get(field_no), entry_ptr);
+        }
+    }
+
+    public List<TableEntryPtr> select(RowPredicate predicate) {
+        //if predicate is simple and contains "=" condition
+        return tryFindEntries(Integer.getInteger(predicate.conditions().get(0)._val2));
     }
 
     public List<TableEntryPtr> tryFindEntries(int key) {
