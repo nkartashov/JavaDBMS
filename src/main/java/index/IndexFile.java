@@ -1,8 +1,12 @@
 package index;
 
+import dbEnvironment.DbContext;
 import memoryManager.PageId;
 import memoryManager.PageManager;
+import memoryManager.TableIterator;
 import utils.ByteConverter;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,17 +17,22 @@ import utils.ByteConverter;
  */
 public class IndexFile {
 
-    public IndexFile (String file_name, String table_name, int field_no) {
-        _file_name = file_name;
-        PageId header_page_id = new PageId(_file_name, _header_page_num);
-        byte[] header_page = _page_manager.createPage(header_page_id);
-        System.arraycopy(ByteConverter.longToByte(_root_ptr), 0, header_page, ROOT_PTR_OFFSET, ByteConverter.LONG_LENGTH_IN_BYTES);
-        _page_manager.updateAndReleasePage(header_page_id, header_page);
-        createIndex(table_name, field_no);
+    public IndexFile (String file_name) {
+        init(file_name);
     }
 
-    public void createIndex(String table_name, int field_no) {
+    public IndexFile (String file_name, String table_name, int field_no, DbContext context) {
+        init(file_name);
+        createIndex(table_name, field_no, context);
+    }
 
+    public void createIndex(String table_name, int field_no, DbContext context) {
+//        TableIterator iter = new TableIterator(context, table_name);
+//        while(!iter.isFinished()) {
+//            List<Object> entry = iter.nextRow();
+//            TableEntryPtr entry_ptr = iter.tableEntryPtr();
+//            insertEntry((Integer) entry.get(field_no), entry_ptr);
+//        }
     }
 
     public TableEntryPtr tryFindEntry(int key) {
@@ -156,6 +165,14 @@ public class IndexFile {
         inner_node.deleteLastEntry();
         _page_manager.updateAndReleasePage(new_page_id, new_page);
         return elem;
+    }
+
+    private void init(String file_name) {
+        _file_name = file_name;
+        PageId header_page_id = new PageId(_file_name, _header_page_num);
+        byte[] header_page = _page_manager.createPage(header_page_id);
+        System.arraycopy(ByteConverter.longToByte(_root_ptr), 0, header_page, ROOT_PTR_OFFSET, ByteConverter.LONG_LENGTH_IN_BYTES);
+        _page_manager.updateAndReleasePage(header_page_id, header_page);
     }
 
     private void updateRootPtr() {
