@@ -136,14 +136,14 @@ public class NodePage {
     }
 
     protected byte[] split() {
-        int middle = KEYS_MAX_NUM / 2;
-        _num_of_valid_keys -= KEYS_MAX_NUM - middle;
-        _valid_keys.clear(middle, _num_of_valid_keys);
+        int middle = (KEYS_MAX_NUM + 1) / 2;
+        _num_of_valid_keys = (KEYS_MAX_NUM + 1) - middle;
+        _valid_keys.clear((KEYS_MAX_NUM + 1) - middle, KEYS_MAX_NUM - 1);
         dumpChanges();
 
-        int bytes_to_copy = (KEYS_MAX_NUM - middle) * (POINTER_SIZE + KEY_SIZE);
+        int bytes_to_copy = (KEYS_MAX_NUM - _num_of_valid_keys) * (POINTER_SIZE + KEY_SIZE);
         byte[] second_part = new byte[bytes_to_copy];
-        int middle_offset = HEADER_SIZE + middle * (POINTER_SIZE + KEY_SIZE);
+        int middle_offset = HEADER_SIZE + _num_of_valid_keys * (POINTER_SIZE + KEY_SIZE);
 
         System.arraycopy(_node_page_data, middle_offset, second_part, 0, bytes_to_copy);
         return second_part;
@@ -189,6 +189,7 @@ public class NodePage {
     static public final int KEY_SIZE = 4;
     static public final int POINTER_SIZE = 12;
     static public final int KEYS_MAX_NUM = (PAGE_SIZE - HEADER_SIZE - POINTER_SIZE) / (KEY_SIZE + POINTER_SIZE);
+//    static public final int KEYS_MAX_NUM = 5;
     static protected final int PAGE_TYPE_OFFSET = 0;
     static protected final int NUM_OF_VALID_KEYS_OFFSET = PAGE_TYPE_OFFSET + ByteConverter.INT_LENGTH_IN_BYTES;
     static protected final int VALID_KEYS_TABLE_OFFSET = NUM_OF_VALID_KEYS_OFFSET + ByteConverter.INT_LENGTH_IN_BYTES;
