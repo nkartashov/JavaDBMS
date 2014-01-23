@@ -25,6 +25,12 @@ public class LeafNodePage extends NodePage {
         System.arraycopy(entries, 0, node_page_data, HEADER_SIZE, entries.length);
     }
 
+    static public void init(byte[] node_page_data) {
+        initHeader(node_page_data, 0);
+        byte[] page_type = ByteConverter.intToByte(TYPE);
+        System.arraycopy(page_type, 0, node_page_data, PAGE_TYPE_OFFSET, page_type.length);
+    }
+
     public TableEntryPtr tryFindKey(int key_to_be_found) {
         TableEntryPtr pointer = new TableEntryPtr();
         int key_pos = tryFindKeyIndex(key_to_be_found);
@@ -81,55 +87,6 @@ public class LeafNodePage extends NodePage {
         System.arraycopy(_node_page_data, pointer_offset, buffer, 0, POINTER_SIZE);
         return buffer;
     }
-
-//    public List<LeafNodeEntry> insertNotFull(int key, TableEntryPtr pointer) {
-//        int first_free_position = _valid_keys.nextClearBit(0);
-//        if (first_free_position != -1) {
-//            NotFullNodeInsertion(key, pointer, first_free_position);
-//            return null;
-//        }
-//        List<LeafNodeEntry> new_node = FullNodeInsertion(key,pointer);
-//        dumpChanges();
-//
-//        return new_node;
-//    }
-
-//    public void insertNotFull (int key, TableEntryPtr pointer) {
-//        int first_free_position = _valid_keys.nextClearBit(0);
-//        _valid_keys.set(first_free_position, true);
-//        _num_of_valid_keys += 1;
-//        SetPointerAndKey(first_free_position, pointer, key);
-//        SortEntries();
-//    }
-
-
-//    private void SetPointerAndKey (int key_index_in_valid_keys_bitset, TableEntryPtr pointer, int key) {
-//        int pointer_offset = HEADER_SIZE + key_index_in_valid_keys_bitset*(KEY_SIZE + POINTER_SIZE);
-//        byte[] buffer = pointer.ToByteArray();
-//        System.arraycopy(buffer, 0, _node_page_data, pointer_offset, POINTER_SIZE);
-//        System.arraycopy(ByteConverter.intToByte(key), 0, _node_page_data, pointer_offset + POINTER_SIZE, KEY_SIZE);
-//    }
-
-//    private List<LeafNodeEntry> FullNodeInsertion(int key, TableEntryPtr pointer) {
-//        List<LeafNodeEntry> all_entries = GetEntriesList();
-//        LeafNodeEntry inserting_entry = new LeafNodeEntry(
-//                ArrayUtils.addAll(pointer.ToByteArray(), ByteConverter.intToByte(key)));
-//        all_entries.add(inserting_entry);
-//        Collections.sort(all_entries, new Comparator<LeafNodeEntry>() {
-//            public int compare(LeafNodeEntry e1, LeafNodeEntry e2) {
-//                if(e1.Key() > e2.Key()) { return 1; } else if (e1.Key() < e2.Key()) { return -1; }
-//                return 0;
-//            }
-//        });
-//        List<LeafNodeEntry> first_part = all_entries.subList(0, all_entries.size()/2);
-//        List<LeafNodeEntry> second_part = all_entries.subList(all_entries.size()/2, all_entries.size());
-//        WriteEntriesList(first_part);
-//        _valid_keys.clear();
-//        for(int i = 0; i != first_part.size(); ++i) { _valid_keys.set(i, true); }
-//        _num_of_valid_keys = first_part.size();
-//
-//        return second_part;
-//    }
 
     static final int TYPE = 1;
 }

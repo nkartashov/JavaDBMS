@@ -33,6 +33,11 @@ public class TableEntryPtr {
         }
     }
 
+    public void setPointer(long page_pointer, int row_pointer) {
+        _page_pointer = page_pointer;
+        _row_pointer = row_pointer;
+    }
+
     public byte[] toByteArray() {
         return ArrayUtils.addAll(ByteConverter.longToByte(_page_pointer), ByteConverter.intToByte(_row_pointer));
     }
