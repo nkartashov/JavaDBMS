@@ -3,6 +3,7 @@ package memoryManager;
 import utils.BitArray;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.Math.min;
 
@@ -65,9 +66,9 @@ public class RowPage extends DiskPage
 		return _isOccupied.isSet(rowId);
 	}
 
-	public ArrayList<Integer> occupiedRowsList()
+	public List<Integer> occupiedRowsList()
 	{
-		ArrayList<Integer> result = new ArrayList<Integer>();
+		List<Integer> result = new ArrayList<Integer>();
 
 		int i = -1;
 
