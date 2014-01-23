@@ -20,12 +20,14 @@ public class RowPredicate
         _row_signature = row_signature;
         _conditions = conditions;
         _equality_conditions_params = new ArrayList<IntPair>();
+        for (int i = 0; i < _conditions.size(); ++i) {
+            getEqualityParams(_conditions.get(i), i);
+        }
     }
 
 	public boolean evaluate(List<Object> row) {
         int i = 0;
         for (SingleCondition cond : _conditions) {
-            getEqualityParams(cond, i);
             int field_index = getFieldIndex(cond);
             if(cond._operator.equals(">")) {
                 if(field_index != -1) {
@@ -109,6 +111,9 @@ public class RowPredicate
     }
 
     private void getEqualityParams(SingleCondition condition, int its_index) {
+        if (!condition._operator.equals("=")) {
+            return;
+        }
         if (condition._val1.indexOf('{') != -1) {
             Integer field_no = Integer.valueOf(condition._val1.replaceAll("[{}]", ""));
             _equality_conditions_params.add(new IntPair(its_index, field_no));
