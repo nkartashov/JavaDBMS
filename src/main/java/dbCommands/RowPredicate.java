@@ -2,6 +2,7 @@ package dbCommands;
 
 import queryParser.SingleCondition;
 import tableTypes.Column;
+import utils.IntPair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +19,13 @@ public class RowPredicate
     public RowPredicate(List<Column> row_signature, List<SingleCondition> conditions) {
         _row_signature = row_signature;
         _conditions = conditions;
-        _table_fields = new ArrayList<Integer>();
+        _equality_conditions_params = new ArrayList<IntPair>();
     }
 
 	public boolean evaluate(List<Object> row) {
+        int i = 0;
         for (SingleCondition cond : _conditions) {
+            getEqualityParams(cond, i);
             int field_index = getFieldIndex(cond);
             if(cond._operator.equals(">")) {
                 if(field_index != -1) {
@@ -96,12 +99,24 @@ public class RowPredicate
                     }
                 }
             }
+            ++i;
         }
         return true;
     }
 
-    public List<Integer> tableFiled() {
-        return _table_fields;
+    public List<IntPair> equalityParams() {
+        return _equality_conditions_params;
+    }
+
+    private void getEqualityParams(SingleCondition condition, int its_index) {
+        if (condition._val1.indexOf('{') != -1) {
+            Integer field_no = Integer.valueOf(condition._val1.replaceAll("[{}]", ""));
+            _equality_conditions_params.add(new IntPair(its_index, field_no));
+        }
+        if (condition._val2.indexOf('{') != -1) {
+            Integer field_no = Integer.valueOf(condition._val2.replaceAll("[{}]", ""));
+            _equality_conditions_params.add(new IntPair(its_index, field_no));
+        }
     }
 
     private int getFieldIndex(SingleCondition condition) {
@@ -117,7 +132,6 @@ public class RowPredicate
     private Object toObject(String raw_val, List<Object> row) {
         if (raw_val.indexOf('{') != -1) {
             Integer field_no = Integer.valueOf(raw_val.replaceAll("[{}]", ""));
-            _table_fields.add(field_no);
             return row.get(field_no);
         }
         else {
@@ -137,7 +151,7 @@ public class RowPredicate
     public List<SingleCondition> conditions() { return _conditions; }
 
 	public static final RowPredicate TRUE_PREDICATE = null;
-    private List<Integer> _table_fields;
+    private List<IntPair> _equality_conditions_params;
 
     private List<Column> _row_signature;
     private List<SingleCondition> _conditions;
