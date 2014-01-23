@@ -50,10 +50,10 @@ public class HeapFileTests
 
 		context.close();
 
-		File tableFile = new File(context.getLocation() + newTable.getRelativeTablePath());
+		File tableFile = new File(context.location() + newTable.relativeTablePath());
 		Assert.assertEquals(true, tableFile.exists());
 
-		File tableDataFile = new File(context.getLocation() + newTable.getRelativeDataPath());
+		File tableDataFile = new File(context.location() + newTable.relativeDataPath());
 		Assert.assertEquals(true, tableDataFile.exists());
 
 		tableFile.delete();

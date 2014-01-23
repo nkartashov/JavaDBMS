@@ -1,13 +1,9 @@
 package dbCommands;
 
 import dbEnvironment.DbContext;
-import memoryManager.HeapFile;
-import tableTypes.ColumnTuple;
 import tableTypes.Table;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,9 +22,9 @@ public class RemoveTableCommand implements DbCommand {
 	{
 		Table tableToDelete = context.tables().get(_tableName);
 
-		File tableFile = new File(context.getLocation() + tableToDelete.getRelativeTablePath());
+		File tableFile = new File(context.location() + tableToDelete.relativeTablePath());
 		tableFile.delete();
-		File tableDataFile = new File(context.getLocation() + tableToDelete.getRelativeDataPath());
+		File tableDataFile = new File(context.location() + tableToDelete.relativeDataPath());
 		tableDataFile.delete();
 
 		context.tables().remove(_tableName);

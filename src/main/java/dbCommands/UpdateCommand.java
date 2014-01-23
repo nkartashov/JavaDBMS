@@ -24,7 +24,7 @@ public class UpdateCommand implements DbCommand
 	{
 		Table tableToSelectFrom = context.getTableByName(_tableName);
 
-		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
+		HeapFile tableHeapFile = new HeapFile(context.location() + tableToSelectFrom.relativeDataPath(),
 			tableToSelectFrom.rowSignature());
 
 		tableHeapFile.updateRows(_predicate, _row);

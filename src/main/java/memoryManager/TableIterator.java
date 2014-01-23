@@ -20,7 +20,7 @@ public class TableIterator
 	{
 		Table tableToSelectFrom = context.getTableByName(tableName);
 
-		_heapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
+		_heapFile = new HeapFile(context.location() + tableToSelectFrom.relativeDataPath(),
 			tableToSelectFrom.rowSignature());
 
 		resetIterator();
@@ -78,7 +78,6 @@ public class TableIterator
 							_status = FINISHED;
 							break;
 					}
-					break;
 				}
 			}
 		_currentPointerIndex = 0;

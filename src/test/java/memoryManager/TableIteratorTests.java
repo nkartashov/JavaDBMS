@@ -119,7 +119,7 @@ public class TableIteratorTests
 
 		Table table = context.getTableByName(tableName);
 
-		HeapFile heapFile = new HeapFile(context.getLocation() + table.getRelativeDataPath(),
+		HeapFile heapFile = new HeapFile(context.location() + table.relativeDataPath(),
 			table.rowSignature());
 
 		PageId pageId = heapFile.localPageId(tableEntryPtr.pagePointer());
@@ -133,6 +133,40 @@ public class TableIteratorTests
 		}
 
 		context.close();
+	}
+
+	@Test
+	public void CorrectnessTest2()
+	{
+		String tableName = "lololol";
+		DbContext context = initBasicContext(tableName);
+
+		List<TableRow> rows = new ArrayList<TableRow>();
+
+		int numberOfRows = 5000;
+
+		for (int i = 0; i < numberOfRows; ++i)
+		{
+			List<String> args = new ArrayList<String>();
+			args.add(Integer.toString(0));
+			args.add("gjghjf");
+			args.add("k");
+			TableRow tableRow = new TableRow(args);
+			rows.add(tableRow);
+		}
+
+		InsertRowsCommand insertRowsCommand = new InsertRowsCommand(tableName, rows);
+		insertRowsCommand.executeCommand(context);
+
+		TableIterator tableIterator = new TableIterator(context, tableName);
+		int expected = 0;
+		while (!tableIterator.isFinished())
+		{
+			++expected;
+			tableIterator.nextRow();
+		}
+
+		Assert.assertEquals(numberOfRows, expected);
 	}
 
 	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/memoryManager/";

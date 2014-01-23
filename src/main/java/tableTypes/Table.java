@@ -90,9 +90,9 @@ public class Table {
 
     public String name() {return _name;}
 
-	public String getRelativeTablePath() {return "tables/" + _uid.toString();}
+	public String relativeTablePath() {return "tables/" + _uid.toString();}
 
-	public String getRelativeDataPath() {return "tables/" + _dataFileName;}
+	public String relativeDataPath() {return "tables/" + _dataFileName;}
 
     public void insertRows(int rows) {_numberOfRows += rows;}
 

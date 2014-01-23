@@ -27,7 +27,7 @@ public class CreateIndexCommand implements DbCommand
 		Index indexToAdd = new Index(UUID.randomUUID(), _tableName, _field);
 		context.indeces().put(_tableName + Integer.toString(_field), indexToAdd);
 
-		new IndexFile(context.getLocation() + indexToAdd.relativeDataPath(),
+		new IndexFile(context.location() + indexToAdd.relativeDataPath(),
 			_tableName, _field, context);
 	}
 

@@ -30,12 +30,12 @@ public class SelectCommand implements DbResultCommand
 	public void executeCommand(DbContext context)
 	{
 		Table tableToSelectFrom = context.getTableByName(_tableName);
-		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
+		HeapFile tableHeapFile = new HeapFile(context.location() + tableToSelectFrom.relativeDataPath(),
 			tableToSelectFrom.rowSignature());
 
 		boolean noIndexSelect = true;
 		IntPair indexPair = null;
-		Index index;
+		Index index = null;
 
 		for (IntPair pair: _predicate.equalityParams())
 		{
@@ -54,7 +54,7 @@ public class SelectCommand implements DbResultCommand
 		}
 		else
 		{
-			IndexFile indexFile = new IndexFile(null, false);
+			IndexFile indexFile = new IndexFile(context.location() + index.relativeDataPath(), false);
 			List<TableEntryPtr> entry_ptrs = indexFile.select(_predicate.conditions().get(indexPair.value1));
 			_result = new ArrayList<Object>();
 			for(TableEntryPtr ptr : entry_ptrs)

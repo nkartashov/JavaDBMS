@@ -44,7 +44,7 @@ public class DbContext {
 			return null;
 	}
 
-	public String getLocation()
+	public String location()
 	{
 		return _location;
 	}
@@ -69,7 +69,7 @@ public class DbContext {
 		{
 			serializer.setLength(0);
 			table.Serialize(serializer);
-			filePath = _location + table.getRelativeTablePath();
+			filePath = _location + table.relativeTablePath();
 			dumpSerialisedDataToFile(filePath, serializer);
 		}
 		_tables.clear();

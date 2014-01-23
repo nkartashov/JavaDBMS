@@ -26,7 +26,7 @@ public class SelectAllRowsCommand implements DbResultCommand
 	{
 		Table tableToSelectFrom = context.getTableByName(_tableName);
 
-		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
+		HeapFile tableHeapFile = new HeapFile(context.location() + tableToSelectFrom.relativeDataPath(),
 			tableToSelectFrom.rowSignature());
 
 		_result = tableHeapFile.selectAllRows();
