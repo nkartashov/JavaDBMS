@@ -269,7 +269,7 @@ public class IndexFile {
         byte[] raw_head = _page_manager.getPage(head_page_id);
         PtrPage list_elem = new PtrPage(raw_head, false);
         List<TableEntryPtr> res = list_elem.getPtrs();
-        while (list_elem.nextPageIndex() != PtrPage.NULL_PTR) {
+        while (list_elem.nextPageIndex() != PtrPage.NULL_PTR && res.size() <= PtrPage.PTRS_MAX_NUM) {
             PageId next_page_id = new PageId(_file_name, list_elem.nextPageIndex());
             byte[] raw_page = _page_manager.getPage(next_page_id);
             list_elem = new PtrPage(raw_page, false);
@@ -287,73 +287,3 @@ public class IndexFile {
     private static PageManager _page_manager = PageManager.getInstance();
     private boolean _page_has_been_updated = false;
 }
-
-//    public void InsertEntry(int key, TableEntryPtr table_entry_pointer) {
-//        PageId root_page_id = new PageId(_file_name, _root_ptr);
-//        InnerNodeInsertEntry insert_entry = InsertInBTree(key, table_entry_pointer, root_page_id);
-//        if(!insert_entry.isEmpty()) {
-//            PageId new_root_page_id = new PageId(_file_name, 0);
-//            byte[] new_root_raw_page = _page_manager.createPage(new_root_page_id);
-//            InnerNodePage.init(new_root_raw_page, insert_entry);
-//            _page_manager.releasePage(new_root_page_id);
-//            _root_ptr = new_root_page_id.getPageNumber();
-//        }
-//    }
-//
-//    private InnerNodeInsertEntry InsertInBTree(int key, TableEntryPtr table_entry_pointer, PageId page_id) {
-//        byte[] node_raw_page = _page_manager.getPage(page_id);
-//        if (NodePage.getPageType(node_raw_page) == LeafNodePage.TYPE) {
-//            LeafNodePage leaf_node = new LeafNodePage(node_raw_page, false);
-//            List<LeafNodeEntry> new_page_entries = leaf_node.insertNotFull(key, table_entry_pointer);
-//            if(new_page_entries != null) {
-//                PageId new_page_id = new PageId(_file_name, 0);
-//                byte[] new_raw_page = _page_manager.createPage(new_page_id);
-//                LeafNodePage.init(new_raw_page, new_page_entries);
-//                _page_manager.releasePage(new_page_id);
-//                _page_manager.releasePage(page_id);
-//                return new InnerNodeInsertEntry(new_page_entries.get(new_page_entries.size() - 1).Key(),
-//                                                page_id.getPageNumber(),
-//                                                new_page_id.getPageNumber());
-//            }
-//            _page_manager.releasePage(page_id);
-//            return new InnerNodeInsertEntry();
-//        }
-//        InnerNodePage cur_node = new InnerNodePage (node_raw_page, false);
-//        InnerNodeInsertEntry insert_entry = InsertInBTree(key,
-//                                                          table_entry_pointer,
-//                                                          new PageId(_file_name, cur_node.nextNodePointer(key)));
-//        if(!insert_entry.isEmpty()) {
-//            //InnerNode insert
-//        }
-//        _page_manager.releasePage(page_id);
-//        return new InnerNodeInsertEntry();
-//    }
-
-//    public void InsertEntry(int key, TableEntryPtr table_entry_pointer) {
-//        PageId root_page_id = new PageId(_file_name, _root_ptr);
-//        byte[] root_page = _page_manager.getPage(root_page_id);
-//        if(NodePage.getPageType(root_page) == LeafNodePage.TYPE) {
-//            LeafNodePage root_node = new LeafNodePage(root_page, false);
-//            if(root_node.isFull()) {
-//                MoveUpElem new_root_elem = SplitLeafNode(root_node, key, table_entry_pointer);
-//                createNewRootNode(new_root_elem);
-//            }
-//            else {
-//                root_node.insertNotFull(key, table_entry_pointer);
-//            }
-//        }
-//        else {
-//            InnerNodePage root_node = new InnerNodePage(root_page, false);
-//            MoveUpElem elem = InsertInBTree(key, table_entry_pointer, root_page);
-//            if(elem != null) {
-//                if(root_node.isFull()) {
-//                    MoveUpElem new_root_elem = root_node.insertFull(elem);
-//                    createNewRootNode(new_root_elem);
-//                }
-//                else {
-//                    root_node.insertNotFull(elem);
-//                }
-//            }
-//        }
-//        _page_manager.releasePage(root_page_id);
-//    }

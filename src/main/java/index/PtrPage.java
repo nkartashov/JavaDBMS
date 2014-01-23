@@ -63,8 +63,8 @@ public class PtrPage extends DiskPage {
         System.arraycopy(ByteConverter.intToByte(_lastPtrPos), 0, _rawPage, LAST_PTR_POS_OFFSET, 4);
     }
 
-    private final int PTR_SIZE = 12;
-    private final int PTRS_MAX_NUM = DATA_PAGE_SIZE_IN_BYTES / PTR_SIZE;
+    static private final int PTR_SIZE = 12;
+    static public final int PTRS_MAX_NUM = DATA_PAGE_SIZE_IN_BYTES / PTR_SIZE;
     private final int PTRS_MAX_NUM_OFFSET = 16;
     private int _lastPtrPos;
     private final int LAST_PTR_POS_OFFSET = 20;
