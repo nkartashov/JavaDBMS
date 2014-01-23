@@ -16,24 +16,54 @@ import java.util.List;
  */
 public class BinaryPredicate {
 
-    public BinaryPredicate(List<Column> row_signature1, List<Column> row_signature2, List<SingleCondition> conditions) {
+    public BinaryPredicate(List<Column> row_signature1, List<SingleCondition> conditions) {
         _row_signature1 = row_signature1;
-        _row_signature2 = row_signature2;
         _conditions = conditions;
     }
 
     public boolean evaluate(List<Object> row1, List<Object> row2) {
-//        for (SingleCondition condition : _conditions) {
-//            int field_no1 =
-//        }
+        for (SingleCondition condition : _conditions) {
+            int field_no1 = getFieldNo(condition._val1);
+            int field_no2 = getFieldNo(condition._val2);
+
+            if(condition._operator.equals(">")) {
+                if (!_row_signature1.get(field_no1).type().greater(row1.get(field_no1), row2.get(field_no2))) {
+                    return false;
+                }
+            }
+            else if(condition._operator.equals("<")) {
+                if (!_row_signature1.get(field_no1).type().less(row1.get(field_no1), row2.get(field_no2))) {
+                    return false;
+                }
+            }
+            else if(condition._operator.equals(">=")) {
+                if (!_row_signature1.get(field_no1).type().greaterOrEqual(row1.get(field_no1), row2.get(field_no2))) {
+                    return false;
+                }
+            }
+            else if(condition._operator.equals("<=")) {
+                if (!_row_signature1.get(field_no1).type().lessOrEqual(row1.get(field_no1), row2.get(field_no2))) {
+                    return false;
+                }
+            }
+            else if(condition._operator.equals("=")) {
+                if (!_row_signature1.get(field_no1).type().equals(row1.get(field_no1), row2.get(field_no2))) {
+                    return false;
+                }
+            }
+            else if(condition._operator.equals("<>")) {
+                if (!_row_signature1.get(field_no1).type().notEquals(row1.get(field_no1), row2.get(field_no2))) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
     private int getFieldNo(String rawFieldNo) {
-        return 0;
+        return Integer.valueOf(rawFieldNo.replaceAll("[{}]", ""));
     }
 
-    private List<Column> _row_signature1;
-    private List<Column> _row_signature2;
+    private List<Column> _row_signature1;;
     private List<SingleCondition> _conditions;
 }

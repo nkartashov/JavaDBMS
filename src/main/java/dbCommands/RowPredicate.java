@@ -41,7 +41,7 @@ public class RowPredicate
                     }
                 }
             }
-            if(cond._operator.equals("<")) {
+            else if(cond._operator.equals("<")) {
                 if(field_index != -1) {
                     if (!_row_signature.get(field_index).type().less(toObject(cond._val1, row), toObject(cond._val2, row))) {
                         return false;
@@ -53,7 +53,7 @@ public class RowPredicate
                     }
                 }
             }
-            if(cond._operator.equals(">=")) {
+            else if(cond._operator.equals(">=")) {
                 if(field_index != -1) {
                     if (!_row_signature.get(field_index).type().greaterOrEqual(toObject(cond._val1, row), toObject(cond._val2, row))) {
                         return false;
@@ -65,7 +65,7 @@ public class RowPredicate
                     }
                 }
             }
-            if(cond._operator.equals("<=")) {
+            else if(cond._operator.equals("<=")) {
                 if(field_index != -1) {
                     if (!_row_signature.get(field_index).type().lessOrEqual(toObject(cond._val1, row), toObject(cond._val2, row))) {
                         return false;
@@ -77,7 +77,7 @@ public class RowPredicate
                     }
                 }
             }
-            if(cond._operator.equals("==")) {
+            else if(cond._operator.equals("=")) {
                 if(field_index != -1) {
                     if (!_row_signature.get(field_index).type().equals(toObject(cond._val1, row), toObject(cond._val2, row))) {
                         return false;
@@ -89,7 +89,7 @@ public class RowPredicate
                     }
                 }
             }
-            if(cond._operator.equals("<>")) {
+            else if(cond._operator.equals("<>")) {
                 if(field_index != -1) {
                     if (!_row_signature.get(field_index).type().notEquals(toObject(cond._val1, row), toObject(cond._val2, row))) {
                         return false;
