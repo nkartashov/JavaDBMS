@@ -1,10 +1,12 @@
 package dbCommands;
 
 import dbEnvironment.DbContext;
+import index.Index;
 import index.IndexFile;
 import index.TableEntryPtr;
 import memoryManager.HeapFile;
 import tableTypes.Table;
+import utils.IntPair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,20 +30,40 @@ public class SelectCommand implements DbResultCommand
 	public void executeCommand(DbContext context)
 	{
 		Table tableToSelectFrom = context.getTableByName(_tableName);
-        HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
-                tableToSelectFrom.rowSignature());
+		HeapFile tableHeapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
+			tableToSelectFrom.rowSignature());
 
-        if(true) {
-            _result = tableHeapFile.selectWhere(_predicate, _count);
-        }
-        else {
-            IndexFile index = new IndexFile(null, false);
-            List<TableEntryPtr> entry_ptrs = index.select(_predicate);
-            _result = new ArrayList<Object>();
-            for(TableEntryPtr ptr : entry_ptrs) {
-                _result.add(tableHeapFile.selectRowFromPage(ptr.pagePointer(), ptr.rowPointer()));
-            }
-        }
+		boolean noIndexSelect = true;
+		IntPair indexPair = null;
+		Index index;
+
+		for (IntPair pair: _predicate.equalityParams())
+		{
+			index = context.getIndexByName(_tableName + Integer.toString(pair.value2));
+			if (index != null)
+			{
+				noIndexSelect = false;
+				indexPair = pair;
+				break;
+			}
+		}
+
+		if (noIndexSelect)
+		{
+			_result = tableHeapFile.selectWhere(_predicate, _count);
+		}
+		else
+		{
+			IndexFile indexFile = new IndexFile(null, false);
+			List<TableEntryPtr> entry_ptrs = indexFile.select(_predicate.conditions().get(indexPair.value1));
+			_result = new ArrayList<Object>();
+			for(TableEntryPtr ptr : entry_ptrs)
+			{
+				List<Object> row = tableHeapFile.selectRowFromPage(ptr.pagePointer(), ptr.rowPointer());
+				if (_predicate.evaluate(row))
+					_result.add(row);
+			}
+		}
 	}
 
 	public List<Object> getResult()
@@ -49,7 +71,7 @@ public class SelectCommand implements DbResultCommand
 		return _result;
 	}
 
-    public RowPredicate predicate() { return _predicate; }
+	public RowPredicate predicate() { return _predicate; }
 
 	private String _tableName;
 	private RowPredicate _predicate = null;
