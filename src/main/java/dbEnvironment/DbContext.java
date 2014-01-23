@@ -153,6 +153,11 @@ public class DbContext {
 		return _tables.get(tableName);
 	}
 
+	public Index getIndexByName (String indexName)
+	{
+		return _indeces.get(indexName);
+	}
+
 	@Override
 	public void finalize() throws Throwable
 	{
