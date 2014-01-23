@@ -116,7 +116,7 @@ public class NodePage {
             key_pos = _valid_keys.nextSetBit(key_pos + 1);
             int current_key = getKey(key_pos);
             if(key == current_key) {
-                return -1;
+                return key_pos;
             }
             if(key < current_key) {
                 key_has_max_val = false;
@@ -177,6 +177,11 @@ public class NodePage {
             return ArrayUtils.addAll(second_part, last_entry);
         }
         return ArrayUtils.addAll(second_part, data);
+    }
+
+    public void insertDuplicate(int key, byte[] data) {
+        int insert_pos = findInsertPos(key);
+        System.arraycopy(data, 0, _node_page_data, HEADER_SIZE + insert_pos*(POINTER_SIZE + KEY_SIZE), data.length);
     }
 
     protected byte[] _node_page_data;

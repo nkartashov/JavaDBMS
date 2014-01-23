@@ -117,6 +117,10 @@ public class IndexFile {
     private MoveUpElem insertInBTree(int key, TableEntryPtr table_entry_ptr, byte[] raw_node_page, long node_ptr) {
         if(NodePage.getPageType(raw_node_page) == LeafNodePage.TYPE) {
             LeafNodePage leaf_node = new LeafNodePage(raw_node_page, node_ptr, false);
+            if(!leaf_node.tryFindKey(key)._is_null) {
+                leaf_node.insertDuplicate(key, table_entry_ptr);
+                _page_has_been_updated = true;
+            }
             if(leaf_node.isFull()) {
                 return splitLeafNode(leaf_node, key, table_entry_ptr);
             }
@@ -276,7 +280,7 @@ public class IndexFile {
         byte[] raw_head = _page_manager.getPage(head_page_id);
         PtrPage list_elem = new PtrPage(raw_head, false);
         List<TableEntryPtr> res = list_elem.getPtrs();
-        while (list_elem.nextPageIndex() != PtrPage.NULL_PTR && res.size() <= PtrPage.PTRS_MAX_NUM) {
+        while (list_elem.nextPageIndex() != PtrPage.NULL_PTR) {
             PageId next_page_id = new PageId(_file_name, list_elem.nextPageIndex());
             byte[] raw_page = _page_manager.getPage(next_page_id);
             list_elem = new PtrPage(raw_page, false);

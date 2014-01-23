@@ -36,6 +36,7 @@ public class TableEntryPtr {
     public void setPointer(long page_pointer, int row_pointer) {
         _page_pointer = page_pointer;
         _row_pointer = row_pointer;
+        _is_null = false;
     }
 
     public byte[] toByteArray() {

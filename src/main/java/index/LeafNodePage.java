@@ -66,6 +66,11 @@ public class LeafNodePage extends NodePage {
         return insertFull(key, buffer);
     }
 
+    public void insertDuplicate(int key, TableEntryPtr pointer) {
+        byte[] buffer = ArrayUtils.addAll(pointer.toByteArray(), ByteConverter.intToByte(key));
+        insertDuplicate(key, buffer);
+    }
+
     private int tryFindKeyIndex(int key_to_be_found) {
         int key_pos = -1;
         for(int i = 0; i != _num_of_valid_keys; ++i) {
