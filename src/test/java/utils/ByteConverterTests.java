@@ -21,4 +21,12 @@ public class ByteConverterTests
 			ByteConverter.stringToBytes(testString,
 				tableTypeSize).length);
 	}
+
+	@Test
+	public void CodeDecodeStringTest()
+	{
+		String lol = "teststseseds";
+		byte[] b = ByteConverter.stringToBytes(lol, lol.length() - 1);
+		Assert.assertEquals(lol, ByteConverter.stringFromBytes(b, 0));
+	}
 }

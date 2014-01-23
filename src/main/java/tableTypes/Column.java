@@ -38,7 +38,9 @@ public class Column {
         result.append("<name>");
         result.append(_name);
         result.append("</name>");
-        return result.append(_type.toString()).toString();
+        result.append(_type.toString());
+	    result.append("</column>");
+	    return result.toString();
     }
 
     public void DeserializeColumn(String text)
@@ -51,8 +53,8 @@ public class Column {
         Pattern typePattern = Pattern.compile("<type>(.*?)</type>");
         Matcher typeMatcher = typePattern.matcher(text);
         typeMatcher.find();
-        String type_text = typeMatcher.group(1);
-        String[] typeAndSize= type_text.split(" ");
+        String typeText = typeMatcher.group(1);
+        String[] typeAndSize= typeText.split(" ");
         if (typeAndSize[0].equals("char"))
             _type = new TableChar(Integer.parseInt(typeAndSize[1]));
         else
