@@ -42,7 +42,7 @@ public class Table {
     public StringBuilder Serialize(StringBuilder result)
     {
         result.append("<table>");
-        this.SerializeMetadata(result);
+        SerializeMetadata(result);
         SerializeColumns(result);
         result.append("</table>");
         return result;
@@ -88,7 +88,7 @@ public class Table {
         }
     }
 
-    public String getName() {return _name;}
+    public String name() {return _name;}
 
 	public String getRelativeTablePath() {return "tables/" + _uid.toString();}
 
