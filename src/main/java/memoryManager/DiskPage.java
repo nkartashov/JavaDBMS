@@ -43,12 +43,12 @@ public class DiskPage {
 		setPrevPageIndex(_rawPage, index);
 	}
 
-	public void write(int dstOffset, byte[] source, int srcOffset, int length)
+	public void writeData(int dstOffset, byte[] source, int srcOffset, int length)
 	{
 		System.arraycopy(source, srcOffset, _rawPage, DATA_OFFSET + dstOffset, length);
 	}
 
-	public byte[] read(int srcOffset, int length)
+	public byte[] readData(int srcOffset, int length)
 	{
 		byte[] result = new byte[length];
 		System.arraycopy(_rawPage, DATA_OFFSET + srcOffset, result, 0, length);

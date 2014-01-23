@@ -18,7 +18,7 @@ public class DiskPageTests
 	{
 		byte[] rawData = new byte[DiskPage.MAX_PAGE_SIZE];
 
-		DiskPage newPage = new DiskPage(rawData, true);
+		DiskPage newPage = new DiskPage(rawData, DiskPage.BLANK_PAGE);
 
 		Assert.assertEquals(DiskPage.NULL_PTR, newPage.nextPageIndex());
 		Assert.assertEquals(DiskPage.NULL_PTR, newPage.prevPageIndex());
@@ -52,9 +52,9 @@ public class DiskPageTests
 
 		byte[] dataPayload = {67, 24, 78, 90, 21, 77, 90, 5, 18};
 
-		newPage.write(56, dataPayload, 0, dataPayload.length);
+		newPage.writeData(56, dataPayload, 0, dataPayload.length);
 
-		byte[] result = newPage.read(56, dataPayload.length);
+		byte[] result = newPage.readData(56, dataPayload.length);
 
 		Assert.assertArrayEquals(dataPayload, result);
 	}

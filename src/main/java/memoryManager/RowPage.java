@@ -33,16 +33,12 @@ public class RowPage extends DiskPage
 
 	public byte[] getRow(int rowId)
 	{
-		int requestedRowOffset = DATA_OFFSET + rowId * _rowSize;
-		byte[] result = new byte[_rowSize];
-		System.arraycopy(_rawPage, requestedRowOffset, result, 0, _rowSize);
-		return result;
+		return readData(rowId * _rowSize, _rowSize);
 	}
 
 	public void setRow(int rowId, byte[] rowData)
 	{
-		int requestedRowOffset = DATA_OFFSET + rowId * _rowSize;
-		System.arraycopy(rowData, 0, _rawPage, requestedRowOffset, _rowSize);
+		writeData(rowId * _rowSize, rowData, 0, _rowSize);
 	}
 
 	public void deleteRow(int rowId)
