@@ -13,20 +13,19 @@ import org.junit.Assert;
 public class ByteConverterTests
 {
 	@Test
-	public void BytesFromStringTest()
-	{
-		int tableTypeSize = 20;
-		String testString = "jfkfldkf";
-		Assert.assertEquals(tableTypeSize,
-			ByteConverter.stringToBytes(testString,
-				tableTypeSize).length);
-	}
-
-	@Test
 	public void CodeDecodeStringTest()
 	{
 		String lol = "teststseseds";
 		byte[] b = ByteConverter.stringToBytes(lol, lol.length() - 1);
 		Assert.assertEquals(lol, ByteConverter.stringFromBytes(b, 0));
+	}
+
+	@Test
+	public void CodeStringTest()
+	{
+		String lol = "teststseseds";
+		int fieldSize = 39;
+
+		Assert.assertEquals(fieldSize, ByteConverter.stringToBytes(lol, fieldSize).length);
 	}
 }

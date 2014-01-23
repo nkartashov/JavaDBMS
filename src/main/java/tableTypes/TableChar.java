@@ -14,15 +14,15 @@ public class TableChar extends BaseTableType {
 
     public TableChar(int size)
     {
-        // In order to hold the \0 delimiter
-	    this.setSize(size + 1);
+        // In order to hold the size
+	    setSize(size + 1);
     }
 
     @Override
     public String toString()
     {
         StringBuilder result = new StringBuilder("<type>char ");
-        result.append(this.size());
+        result.append(size() - 1);
         result.append("</type>");
         return result.toString();
     }
