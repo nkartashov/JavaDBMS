@@ -48,9 +48,6 @@ public class NodePage {
 
     protected long nodePointerBeforeKey (int key_index_in_valid_keys_bitset) {
         int pointer_offset = HEADER_SIZE + key_index_in_valid_keys_bitset*(KEY_SIZE + POINTER_SIZE);
-//        byte[] buffer = new byte[POINTER_SIZE];
-//        System.arraycopy(_node_page_data, pointer_offset, buffer, 0, POINTER_SIZE);
-//        return ByteConverter.longFromByte(buffer, 0);
         return ByteConverter.longFromByte(_node_page_data, pointer_offset);
     }
 
@@ -92,15 +89,17 @@ public class NodePage {
     }
 
     protected void moveDataRight(int from_pos) {
-        byte[] buffer = Arrays.copyOf(_node_page_data, _node_page_data.length);
-        int offset = HEADER_SIZE + from_pos*(POINTER_SIZE + KEY_SIZE);
-        int offset_plus_one = offset + POINTER_SIZE + KEY_SIZE;
-        System.arraycopy(buffer, offset, _node_page_data, offset_plus_one,
-                         lastEntryPos() + POINTER_SIZE + KEY_SIZE);
+        int start_offset = HEADER_SIZE + from_pos*(POINTER_SIZE + KEY_SIZE);
+        int end_offset = HEADER_SIZE + (lastEntryPos() + 1)*(POINTER_SIZE + KEY_SIZE) + POINTER_SIZE;
+        byte[] buffer = new byte[end_offset - start_offset];
+        System.arraycopy(_node_page_data, start_offset, buffer, 0, buffer.length);
+        int start_plus_one = start_offset + POINTER_SIZE + KEY_SIZE;
+        System.arraycopy(buffer, 0, _node_page_data, start_plus_one, buffer.length);
 
-        BitSet val_keys_copy = BitSet.valueOf(_valid_keys.toByteArray());
+        BitArray val_keys_copy = new BitArray(_valid_keys.toByteArray());
+        int to_pos = lastEntryPos() + 2;
         _valid_keys.clear(from_pos);
-        for (int i = from_pos + 1; i < lastEntryPos() + 1; ++i) {
+        for (int i = from_pos + 1; i < to_pos; ++i) {
             if(val_keys_copy.get(i - 1)) {
                 _valid_keys.set(i);
             }
@@ -111,7 +110,7 @@ public class NodePage {
     }
 
     protected int findInsertPos(int key) {
-        int key_pos = 0;
+        int key_pos = -1;
         boolean key_has_max_val = true;
         for(int i = 0; i < _num_of_valid_keys; ++i) {
             key_pos = _valid_keys.nextSetBit(key_pos + 1);
@@ -127,10 +126,10 @@ public class NodePage {
         if (key_has_max_val) {
             ++key_pos;
         }
-        else if (!_valid_keys.get(key_pos - 1)) {
-            --key_pos;
+        else if (key_pos != 0 && !_valid_keys.get(key_pos - 1)) {
+             --key_pos;
         }
-        else {
+        else if (_num_of_valid_keys != 0) {
             moveDataRight(key_pos);
         }
         return key_pos;
@@ -141,9 +140,13 @@ public class NodePage {
         _num_of_valid_keys -= KEYS_MAX_NUM - middle;
         _valid_keys.clear(middle, _num_of_valid_keys);
         dumpChanges();
-        byte[] second_part = new byte[KEYS_MAX_NUM - middle];
-        System.arraycopy(_node_page_data, middle, second_part, 0, KEYS_MAX_NUM - middle);
-        return  second_part;
+
+        int bytes_to_copy = (KEYS_MAX_NUM - middle) * (POINTER_SIZE + KEY_SIZE);
+        byte[] second_part = new byte[bytes_to_copy];
+        int middle_offset = HEADER_SIZE + middle * (POINTER_SIZE + KEY_SIZE);
+
+        System.arraycopy(_node_page_data, middle_offset, second_part, 0, bytes_to_copy);
+        return second_part;
     }
 
     public void insertNotFull(int key, byte[] data) {
@@ -154,7 +157,7 @@ public class NodePage {
         _valid_keys.set(insert_pos);
         ++_num_of_valid_keys;
         dumpChanges();
-        System.arraycopy(data, 0, _node_page_data, insert_pos, data.length);
+        System.arraycopy(data, 0, _node_page_data, HEADER_SIZE + insert_pos*(POINTER_SIZE + KEY_SIZE), data.length);
     }
 
     public byte[] insertFull (int key, byte[] data) {
@@ -164,16 +167,16 @@ public class NodePage {
         }
         byte[] last_entry = null;
         if (last_key > key) {
-            last_entry = getRawEntry(lastEntryPos());
+            last_entry = ArrayUtils.addAll(getRawEntry(lastEntryPos()), ByteConverter.longToByte(lastNodePointer()));
             _valid_keys.clear(lastEntryPos());
             --_num_of_valid_keys;
             insertNotFull(key, data);
         }
         byte[] second_part = split ();
         if(last_entry != null) {
-            second_part = ArrayUtils.addAll(second_part, last_entry);
+            return ArrayUtils.addAll(second_part, last_entry);
         }
-        return second_part;
+        return ArrayUtils.addAll(second_part, data);
     }
 
     protected byte[] _node_page_data;

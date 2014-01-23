@@ -34,7 +34,7 @@ public class InnerNodePage extends NodePage {
         for(int i = 0; i != _num_of_valid_keys; ++i) {
             key_pos = _valid_keys.nextSetBit(key_pos + 1);
             int current_key = getKey(key_pos);
-            if (key < current_key) {
+            if (key <= current_key) {
                 return nodePointerBeforeKey(key_pos);
             }
         }
@@ -51,6 +51,8 @@ public class InnerNodePage extends NodePage {
 
     public void deleteLastEntry() {
         _valid_keys.clear(lastEntryPos());
+        --_num_of_valid_keys;
+        dumpChanges();
     }
 
     static private void initHeaderAndType(byte[] node_page_data, int entries_num) {
