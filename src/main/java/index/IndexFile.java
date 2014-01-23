@@ -2,6 +2,7 @@ package index;
 
 import memoryManager.PageId;
 import memoryManager.PageManager;
+import utils.ByteConverter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,8 +13,17 @@ import memoryManager.PageManager;
  */
 public class IndexFile {
 
-    public IndexFile (String file_name) {
+    public IndexFile (String file_name, String table_name, int field_no) {
         _file_name = file_name;
+        PageId header_page_id = new PageId(_file_name, _header_page_num);
+        byte[] header_page = _page_manager.createPage(header_page_id);
+        System.arraycopy(ByteConverter.longToByte(_root_ptr), 0, header_page, ROOT_PTR_OFFSET, ByteConverter.LONG_LENGTH_IN_BYTES);
+        _page_manager.updateAndReleasePage(header_page_id, header_page);
+        createIndex(table_name, field_no);
+    }
+
+    public void createIndex(String table_name, int field_no) {
+
     }
 
     public TableEntryPtr tryFindEntry(int key) {
@@ -45,7 +55,13 @@ public class IndexFile {
         if(new_root_elem != null) {
             createNewRootNode(new_root_elem);
         }
-        _page_manager.releasePage(root_page_id);
+        if(_page_has_been_updated) {
+            _page_manager.updateAndReleasePage(root_page_id, root_page);
+            _page_has_been_updated = false;
+        }
+        else {
+            _page_manager.releasePage(root_page_id);
+        }
     }
 
     private MoveUpElem insertInBTree(int key, TableEntryPtr table_entry_ptr, byte[] raw_node_page, long node_ptr) {
@@ -56,6 +72,7 @@ public class IndexFile {
             }
             else {
                 leaf_node.insertNotFull(key, table_entry_ptr);
+                _page_has_been_updated = true;
                 return null;
             }
         }
@@ -63,7 +80,13 @@ public class IndexFile {
         PageId next_node_id = new PageId(_file_name, current_node.nextNodePointer(key));
         byte[] raw_next_node_page = _page_manager.getPage(next_node_id);
         MoveUpElem elem = insertInBTree(key, table_entry_ptr, raw_next_node_page, next_node_id.getPageNumber());
-        _page_manager.releasePage(next_node_id);
+        if (_page_has_been_updated) {
+            _page_manager.updateAndReleasePage(next_node_id, raw_next_node_page);
+            _page_has_been_updated = false;
+        }
+        else {
+            _page_manager.releasePage(next_node_id);
+        }
 
         if(elem != null) {
             if(current_node.isFull()) {
@@ -71,6 +94,7 @@ public class IndexFile {
             }
             else {
                 current_node.insertNotFull(elem);
+                _page_has_been_updated = true;
                 return null;
             }
         }
@@ -103,23 +127,26 @@ public class IndexFile {
         byte[] new_root_page = _page_manager.createPage(new_page_id);
         InnerNodePage.init(new_root_page, new_root_elem);
         _root_ptr = new_page_id.getPageNumber();
-        _page_manager.releasePage(new_page_id);
+        updateRootPtr();
+        _page_manager.updateAndReleasePage(new_page_id, new_root_page);
     }
 
     private MoveUpElem splitLeafNode(LeafNodePage leaf_node, int key, TableEntryPtr table_entry_ptr) {
         byte[] second_part = leaf_node.insertFull(key, table_entry_ptr);
+        _page_has_been_updated = true;
         PageId new_page_id = new PageId(_file_name, 0);
         byte[] new_page = _page_manager.createPage(new_page_id);
         LeafNodePage.init(new_page, second_part, LeafNodePage.KEYS_MAX_NUM - LeafNodePage.KEYS_MAX_NUM / 2);
         MoveUpElem elem = new MoveUpElem(leaf_node.getKey(leaf_node.lastEntryPos()),
                                          leaf_node._self_ptr,
                                          new_page_id.getPageNumber());
-        _page_manager.releasePage(new_page_id);
+        _page_manager.updateAndReleasePage(new_page_id, new_page);
         return elem;
     }
 
     private MoveUpElem splitInnerNode(InnerNodePage inner_node, MoveUpElem elem_to_insert) {
         byte[] second_part = inner_node.insertFull(elem_to_insert);
+        _page_has_been_updated = true;
         PageId new_page_id = new PageId(_file_name, 0);
         byte[] new_page = _page_manager.createPage(new_page_id);
         InnerNodePage.init(new_page, second_part, LeafNodePage.KEYS_MAX_NUM - LeafNodePage.KEYS_MAX_NUM / 2);
@@ -127,13 +154,23 @@ public class IndexFile {
                 inner_node._self_ptr,
                 new_page_id.getPageNumber());
         inner_node.deleteLastEntry();
-        _page_manager.releasePage(new_page_id);
+        _page_manager.updateAndReleasePage(new_page_id, new_page);
         return elem;
     }
 
+    private void updateRootPtr() {
+        PageId header_page_id = new PageId(_file_name, _header_page_num);
+        byte[] header_page = _page_manager.getPage(header_page_id);
+        System.arraycopy(ByteConverter.longToByte(_root_ptr), 0, header_page, ROOT_PTR_OFFSET, ByteConverter.LONG_LENGTH_IN_BYTES);
+        _page_manager.updateAndReleasePage(header_page_id, header_page);
+    }
+
     private String _file_name;
+    private long _header_page_num = 0;
+    private int ROOT_PTR_OFFSET = 0;
     private long _root_ptr = 0;
     private static PageManager _page_manager = PageManager.getInstance();
+    private boolean _page_has_been_updated = false;
 }
 
 //    public void InsertEntry(int key, TableEntryPtr table_entry_pointer) {
