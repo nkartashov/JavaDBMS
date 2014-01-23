@@ -54,7 +54,7 @@ public class Column {
         Matcher typeMatcher = typePattern.matcher(text);
         typeMatcher.find();
         String typeText = typeMatcher.group(1);
-        String[] typeAndSize= typeText.split(" ");
+        String[] typeAndSize = typeText.split(" ");
         if (typeAndSize[0].equals("char"))
             _type = new TableChar(Integer.parseInt(typeAndSize[1]));
         else

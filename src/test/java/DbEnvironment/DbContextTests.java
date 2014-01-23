@@ -27,7 +27,7 @@ public class DbContextTests
 
 		ColumnTuple columnTuple1 = new ColumnTuple("lol", 4, "int");
 		ColumnTuple columnTuple2 = new ColumnTuple("foz", 16, "char");
-		ColumnTuple columnTuple3 = new ColumnTuple("baz", 1, "char");
+		ColumnTuple columnTuple3 = new ColumnTuple("baz", 2, "char");
 		List<ColumnTuple> tuples = new ArrayList<ColumnTuple>();
 		tuples.add(columnTuple1);
 		tuples.add(columnTuple2);

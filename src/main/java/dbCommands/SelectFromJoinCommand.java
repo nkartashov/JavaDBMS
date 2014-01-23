@@ -38,8 +38,8 @@ public class SelectFromJoinCommand implements DbResultCommand
 			rightTable = buf;
 		}
 
-		TableIterator leftIterator = new TableIterator(context, leftTable.getName());
-		TableIterator rightIterator = new TableIterator(context, rightTable.getName());
+		TableIterator leftIterator = new TableIterator(context, leftTable.name());
+		TableIterator rightIterator = new TableIterator(context, rightTable.name());
 
 		while (!leftIterator.isFinished())
 		{
