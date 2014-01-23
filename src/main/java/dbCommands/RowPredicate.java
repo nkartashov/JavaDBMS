@@ -3,6 +3,7 @@ package dbCommands;
 import queryParser.SingleCondition;
 import tableTypes.Column;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,6 +18,7 @@ public class RowPredicate
     public RowPredicate(List<Column> row_signature, List<SingleCondition> conditions) {
         _row_signature = row_signature;
         _conditions = conditions;
+        _table_fields = new ArrayList<Integer>();
     }
 
 	public boolean evaluate(List<Object> row) {
@@ -98,6 +100,10 @@ public class RowPredicate
         return true;
     }
 
+    public List<Integer> tableFiled() {
+        return _table_fields;
+    }
+
     private int getFieldIndex(SingleCondition condition) {
         if (condition._val1.indexOf('{') != -1) {
             return Integer.valueOf(condition._val1.replaceAll("[{}]", ""));
@@ -110,7 +116,9 @@ public class RowPredicate
 
     private Object toObject(String raw_val, List<Object> row) {
         if (raw_val.indexOf('{') != -1) {
-            return row.get(Integer.valueOf(raw_val.replaceAll("[{}]", "")));
+            Integer field_no = Integer.valueOf(raw_val.replaceAll("[{}]", ""));
+            _table_fields.add(field_no);
+            return row.get(field_no);
         }
         else {
             if (isNumber(raw_val)) {
@@ -129,6 +137,7 @@ public class RowPredicate
     public List<SingleCondition> conditions() { return _conditions; }
 
 	public static final RowPredicate TRUE_PREDICATE = null;
+    private List<Integer> _table_fields;
 
     private List<Column> _row_signature;
     private List<SingleCondition> _conditions;
