@@ -16,7 +16,7 @@ public class SQLParser {
     }
 
     public DbCommand parse (String query) {
-        query = query.trim().replaceAll(" +", " ").replaceAll(" +,", ",").replace(";", "");
+        query = query.trim().replaceAll(" +", " ").replaceAll(" +,", ",").replace(";", "").replaceAll("\n", "");
         String firstWord = query.split(" ", 2)[0].toUpperCase();
         if (firstWord.equals("CREATE")) {
             String secondWord = query.split(" ", 3)[1].toUpperCase();
@@ -47,42 +47,38 @@ public class SQLParser {
     }
 
     private DbCommand parseCreateTable(String query) {
-        String nameAndRes[] =  query.split(" ", 4);
-        String name = nameAndRes[2];
-        ArrayList<Object> tableParams = new ArrayList<Object>();
-        tableParams.add(name);
-
-        String columns[] = nameAndRes[3].replace("(", " ").replace(")", " ").trim().split(",");
-        ArrayList<ColumnTuple> parsedColumns = new ArrayList<ColumnTuple>();
+        query =  query.split(" ", 3)[2];
+        String name = query.split("\\(", 2)[0];
+        String[] columns = query.split("\\(", 2)[1].split(",");
+        List<ColumnTuple> parsedColumns = new ArrayList<ColumnTuple>();
 
         for (String column : columns) {
-            String forNameAndType[] = column.trim().replaceAll(" +", " ").split(" ");
-            if (forNameAndType.length == 3)
-                parsedColumns.add(new ColumnTuple(forNameAndType[0], Integer.parseInt(forNameAndType[2]), forNameAndType[1]));
-            else
-                parsedColumns.add(new ColumnTuple(forNameAndType[0], 0, forNameAndType[1]));
+            String columnName = column.trim().split(" ", 2)[0].trim();
+            String restPart = column.trim().split(" ", 2)[1].trim();
+            int size = 0;
+            String type;
+            if(restPart.contains("(")) {
+                type = restPart.split("\\(", 2)[0].trim();
+                size = Integer.valueOf(restPart.split("\\(", 2)[1].replace(")", "").trim());
+            }
+            else {
+                type = restPart;
+            }
+            parsedColumns.add(new ColumnTuple(columnName, size, type));
         }
-        tableParams.add(parsedColumns);
-	    //System.out.println(tableParams);
-        return new CreateTableCommand(tableParams.get(0).toString(), (ArrayList<ColumnTuple>)tableParams.get(1));
+        return new CreateTableCommand(name, parsedColumns);
     }
 
     private DbCommand parseInsertInto(String query) {
         String nameAndRes[] =  query.split(" ", 4);
         String name = nameAndRes[2];
-        String rows[] = nameAndRes[3].replace("VALUES", "").replace("(", "").trim().split("\\),");
-        TableRow[] insertionList = new TableRow[rows.length];
-        int i = 0;
+        String rows[] = nameAndRes[3].replace("VALUES", "").trim().split("\\) ?,");
+        List<TableRow> insertionList = new ArrayList<TableRow>();
         for (String row : rows) {
-            String[] values = row.replace(")", "").split(",");
-            insertionList[i] = new TableRow(new ArrayList<String>(Arrays.asList(values)));
-            ++i;
+            String[] values = row.trim().replace("(", "").replace(")", "").split(", ?");
+            insertionList.add(new TableRow(new ArrayList<String>(Arrays.asList(values))));
         }
-        //DbCommand iic = new InsertRowsCommand(name, insertionList);
-        System.out.println(name);
-        //System.out.println(insertionList);
-        //return iic;
-        return null;
+        return new InsertRowsCommand(name, insertionList);
     }
 
     private DbResultCommand parseSelect(String query) {

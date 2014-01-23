@@ -97,5 +97,25 @@ public class ParseTests {
         Assert.assertEquals(predicate.evaluate(test_row2), false);
     }
 
+    @Test
+    public void InsertTest() {
+        String query = "INSERT INTO test_tab VALUES (1, 2, \"dog\"), \n(3, 4, \"cat\")";
+        SQLParser parser = new SQLParser(null);
+        InsertRowsCommand command = (InsertRowsCommand) parser.parse(query);
+        Assert.assertEquals(true, true);
+    }
+
+    @Test
+    public void CreateTableTest() {
+        String query = "CREATE TABLE test_tab \n ( \n " +
+                "col1 int , \n" +
+                "col2 char(32) ,\n" +
+                "col3 char (8)\n" +
+                ")";
+        SQLParser parser = new SQLParser(null);
+        CreateTableCommand command = (CreateTableCommand) parser.parse(query);
+        Assert.assertEquals(true, true);
+    }
+
 	private static final String RESOURCE_PATH = "/Users/nikita_kartashov/Documents/Work/java/JavaDBMS/src/test/resources/";
 }
