@@ -1,7 +1,5 @@
 package memoryManager;
 
-import java.util.UUID;
-
 /**
  * Created with IntelliJ IDEA.
  * User: nikita_kartashov
@@ -16,7 +14,7 @@ public class PageId {
         _pageNumber = pageNumber;
     }
 
-    public String getFilePath()
+    public String filePath()
     {
         return _filePath;
     }

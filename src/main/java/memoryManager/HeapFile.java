@@ -19,6 +19,8 @@ public class HeapFile
 	// Not full = green
 	// Full = red
 
+	public int rowSize() {return _rowSize;}
+
 	public HeapFile(String filePath, List<Column> rowSignature)
 	{
 		_filePath = filePath;
@@ -112,7 +114,7 @@ public class HeapFile
 		RowPage page = new RowPage(_pageManager.getPage(pageId), DiskPage.NOT_BLANK_PAGE, _rowSize);
 		try
 		{
-			ArrayList<Integer> rowList = null;
+			List<Integer> rowList = null;
 			if (!page.isEmpty())
 				rowList = page.occupiedRowsList();
 			if (rowList == null)
@@ -223,7 +225,7 @@ public class HeapFile
 		RowPage page = new RowPage(_pageManager.getPage(pageId), DiskPage.NOT_BLANK_PAGE, _rowSize);
 		try
 		{
-			ArrayList<Integer> rowList = null;
+			List<Integer> rowList = null;
 			if (!page.isEmpty())
 				rowList = page.occupiedRowsList();
 			if (rowList == null)
@@ -326,10 +328,19 @@ public class HeapFile
 		return selectAllRowsFromPage(page, predicate);
 	}
 
+	public  List<Integer> occupiedRowsList(long pageNumber)
+	{
+		PageId pageId = localPageId(pageNumber);
+		RowPage page = new RowPage(_pageManager.getPage(pageId), DiskPage.NOT_BLANK_PAGE, _rowSize);
+		_pageManager.releasePage(pageId);
+		return page.occupiedRowsList();
+	}
+
+
 	private List<Object> selectAllRowsFromPage(RowPage page, RowPredicate predicate)
 	{
 		List<Object> result = null;
-		ArrayList<Integer> rowList = null;
+		List<Integer> rowList = null;
 		if (!page.isEmpty())
 			rowList = page.occupiedRowsList();
 		if (rowList == null)
@@ -349,7 +360,7 @@ public class HeapFile
 		return result;
 	}
 
-	private List<Object> selectRowFromPage(RowPage page, int rowNumber)
+	public List<Object> selectRowFromPage(RowPage page, int rowNumber)
 	{
 		List<Object> result;
 
@@ -513,7 +524,7 @@ public class HeapFile
 		_pageManager.releasePage(localPageId(index));
 	}
 
-	private PageId localPageId(long pageIndex) {return new PageId(_filePath, pageIndex);}
+	public PageId localPageId(long pageIndex) {return new PageId(_filePath, pageIndex);}
 	private PageId blankLocalPageId() {return localPageId(0);}
 
 	private String _filePath;

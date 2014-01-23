@@ -28,7 +28,7 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
 	{
 		try
 		{
-			RandomAccessFile outputFile = new RandomAccessFile(pageId.getFilePath(), "rw");
+			RandomAccessFile outputFile = new RandomAccessFile(pageId.filePath(), "rw");
 			long fileLength = outputFile.length();
 			if (fileLength != 0)
 			{
@@ -84,7 +84,7 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
     {
         try
         {
-            RandomAccessFile inputFile = new RandomAccessFile(pageId.getFilePath(), "r");
+            RandomAccessFile inputFile = new RandomAccessFile(pageId.filePath(), "r");
             byte[] page = new byte[DiskPage.MAX_PAGE_SIZE];
 
             long offsetToPage = DiskPage.MAX_PAGE_SIZE * pageId.getPageNumber();
@@ -135,7 +135,7 @@ public class PageManager extends LinkedHashMap<PageId, ManagedMemoryPage>
 	{
 		try
 		{
-			RandomAccessFile outputFile = new RandomAccessFile(pageId.getFilePath(), "rw");
+			RandomAccessFile outputFile = new RandomAccessFile(pageId.filePath(), "rw");
 			long offsetToPage = DiskPage.MAX_PAGE_SIZE * pageId.getPageNumber();
 
 			outputFile.seek(offsetToPage);

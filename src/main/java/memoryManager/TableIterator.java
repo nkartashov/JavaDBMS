@@ -2,6 +2,7 @@ package memoryManager;
 
 import dbCommands.RowPredicate;
 import dbEnvironment.DbContext;
+import index.TableEntryPtr;
 import tableTypes.Table;
 
 import java.util.List;
@@ -22,6 +23,11 @@ public class TableIterator
 		_heapFile = new HeapFile(context.getLocation() + tableToSelectFrom.getRelativeDataPath(),
 			tableToSelectFrom.rowSignature());
 
+		resetIterator();
+	}
+
+	public void resetIterator()
+	{
 		_currentRow = -1;
 		_nextPointerPageIndex = DiskPage.NULL_PTR;
 		_status = RED_PAGES;
@@ -78,7 +84,18 @@ public class TableIterator
 		_currentPointerIndex = 0;
 		}
 		_currentRows = _heapFile.selectAllRowsFromPage(_pointers[_currentPointerIndex++], RowPredicate.TRUE_PREDICATE);
+		calculateRowIds(_pointers[_currentPointerIndex - 1]);
 		_currentRow = 0;
+	}
+
+	private void calculateRowIds(long pageNumber)
+	{
+		_rowIds = new TableEntryPtr[_currentRows.size()];
+		List<Integer> occupiedRowsList = _heapFile.occupiedRowsList(pageNumber);
+		for (int i = 0; i < _currentRows.size(); ++i)
+		{
+			_rowIds[i] = new TableEntryPtr(pageNumber, occupiedRowsList.get(i));
+		}
 	}
 
 	private void updatePointersAndNextPageIndex()
@@ -99,7 +116,7 @@ public class TableIterator
 		_nextPointerPageIndex = HeapFile.FIRST_GREEN_POINTER_PAGE_INDEX;
 	}
 
-	public int status() {return _status;}
+	public TableEntryPtr tableEntryPtr() {return _rowIds[_currentRow - 1];}
 
 	public static final int RED_PAGES = -1;
 	public static final int GREEN_PAGES = -2;
@@ -114,4 +131,5 @@ public class TableIterator
 
 	private HeapFile _heapFile;
 	private List<Object> _currentRows;
+	private TableEntryPtr[] _rowIds;
 }

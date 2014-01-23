@@ -16,6 +16,12 @@ public class TableEntryPtr {
         _is_null = true;
     }
 
+	public TableEntryPtr(long page_pointer, int row_pointer)
+	{
+		_page_pointer = page_pointer;
+		_row_pointer = row_pointer;
+	}
+
     public void setPointer(byte[] entry_pointer) {
         if (entry_pointer.length != 0) {
             _page_pointer = ByteConverter.longFromByte(entry_pointer, 0);
